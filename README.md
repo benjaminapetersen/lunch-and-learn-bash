@@ -4,7 +4,47 @@ Resources used to prep these tasks:
 
 - [Bash Beginners Guide](http://www.tldp.org/LDP/Bash-Beginners-Guide/html/Bash-Beginners-Guide.html#intro_01)
 - [linuxcommand.org](http://linuxcommand.org)
+- [linuxjourney.com](https://linuxjourney.com/)
 
+
+## BSD vs GNU & Using these on MacOS
+
+MacOS (what I work on) features the BSD version of many of these tools.
+This is, in my opinion, unfortunate, as BSD is not as user friendly (unconcerned
+with issues of usability).  GNU versions of these tools tend to have more
+long flags, which are easier to remember & script with.  
+
+To get the GNU version of a tool on MacOS, you can install it via homebrew:
+
+```bash
+brew install gnu-sed # installs gsed
+brew install gnu-sed --with-default-names # allows gset as `sed`, more ideal
+```
+
+To get the NGU versions of many tools on MacOS, you can do install the following
+package:
+
+```bash
+# these tools all have a `g` prefix
+brew install coreutils
+# to get around the `g` prefix & use them as normal, add the following
+# to your PATH via ~/.bashrc or ~/.bash_profile:
+PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+# to update the manual pages as well, you will need to add this:
+MANPATH="/usr/local/opt/coreutils/libexec/gnuman:$MANPATH"
+```
+
+To get even MORE:
+
+```bash
+# without aliases:
+brew install coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent gnu-getopt
+# with aliases (you prob want this):
+$ brew install --with-default-names coreutils findutils gnu-tar gnu-sed gawk gnutls gnu-indent gnu-getopt
+# normal names w/o `g` add to PATH via ~/.bashrc or ~/.bash_profile:
+PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+
+```
 
 ## Some basic bash commands
 
@@ -19,7 +59,8 @@ bash commands, using the following links as reference points:
 
 ### find
 
-Find recursively searches a directory tree and evaluates an expression in terms of each file in the tree.
+Find is primarily concerned with finding files by name. It recursively searches a directory
+tree and evaluates an expression in terms of each file in the tree.
 
 <!--
 Some helpful links on find:
@@ -30,6 +71,7 @@ Some helpful links on find:
 # find files using a file name
 find ./ -name "some-file.txt" # note that ./ will print extra slashes, best to use . only
 find . -name "some-file.txt"
+find . "some-file.txt" # can skip the -name flag as well
 # case insensitive
 find . -iname 'some.*'
 # wildcard search
@@ -52,6 +94,7 @@ find . -user <user-name>
 find . -group <group-name>
 # find files by access time
 find . -atime 2 # accessed 2 days ago
+find . -atime +2 # accessed greater than two days ago
 find . -atime -2 # accessed less than two days ago
 # find files by modification time
 find . -mtime 1 # modified one day ago
@@ -62,6 +105,15 @@ find . -name "garbage.*" -delete
 find . -type f -name "*.mp3" -exec cp {} ~/tmp/my-music \;
 # use find to copy 1 file into many directories using `-exec cp`
 find ./dir1 dir2 ~/dir3 -type d -exec cp some-file.txt {} \;
+# find files with terrible permissions with -perm
+find -type f -perm 0777
+# use find with chmod to fix files with bad perms
+# TODO: move to cookbook section
+find -type f -perm 0777 -exec chmod 755 {} \;
+# TODO: move to cookbook section
+# Using sed with find, search a directory for a string and replace it with another string
+find . -type f -name '*.txt' -exec sed --in-place 'backup-suffix.or.no.backup' 's/foo-bar/baz-shizzle/g' {} \;
+find . -type f -name '*.txt' -exec sed -i '' 's/foo-bar/baz-shizzle/g' {} \;
 ```
 
 
@@ -185,6 +237,52 @@ Ctrl+r # type search term, then repeat Ctrl+r until match
 ^shipple^shizzle^ # runs: foobar --baz=shizzle
 ```
 
+### ln
+
+TODO: fill out ln
+
+```bash
+# symbolic link
+ln -s ~/dotfiles/foo ./.foo
+```
+
+### lsof
+
+`lsof` stands for "List Open Files".  Think of it as `ls` (list) + `of` (open files).  In
+UNIX, everything is a file (pipes, sockets, directories, devices, etc) [quoted here](http://www.thegeekstuff.com/2012/08/lsof-command-examples).  
+
+```bash
+# open files belonging to active processes
+lsof
+# list processes that are listening to a port
+lsof -i tcp:<port>
+lsof -i tcp:9000
+# list process which opened a specific file
+lsof /path/to/file.log
+# list all processes which opened a file under a specific dir
+lsof +D /path/to/dir
+# list files opened by process names starting with a string
+lsof -c ssh -c init
+# list process using a mount point
+lsof /home
+lsof +D /home
+# list files opened by a user
+lsof -u <username>
+lsof -u bob
+# list files opened by a specific process
+lsof -p <pid>
+lsof -p 12345
+# kill processes belonging to a user
+kill -9 `lsof -t -u <username>`
+kill -9 `lsof -t -u bob`
+# list network connections
+lsof -i
+# list network files used by a process
+lsof -i -a -p <pid>
+lsof -i -a -p 1234
+
+```
+
 ### scp
 
 A command for securely copying files between hosts on a network using ssh for data transfer.
@@ -197,11 +295,44 @@ A command for securely copying files between hosts on a network using ssh for da
 
 Sed stands for `S`tream `Ed`itor. A great overview of sed [here](http://www.grymoire.com/Unix/Sed.html)
 
+The primary command for sed is substitute.  It has four parts:
+  s                        substitue command
+  /../../                  delimiter (can change)
+  regex search             pattern or string
+  replacement string       pattern or string (?)
+
+> NOTE: MacOS uses BSD sed instead of GNU sed, which means it
+> has alternate flags (and is lacking the nice, readable long flags).
+> This can be remedied with the following:
+
+`$ brew install gnu-sed --with-default-names`
+
+> Yay for usability.
+
 ```bash
-# TODO: more
-# Using sed with find, search a directory for a string and replace it with another string
-find . -type f -name '*.txt' -exec sed --in-place 'backup-suffix.or.no.backup' 's/foo-bar/baz-shizzle/g' {} \;
-find . -type f -name '*.txt' -exec sed -i '' 's/foo-bar/baz-shizzle/g' {} \;
+# the substitute command s
+# change occurance of a regex into a new value
+sed s/day/night/ < day.txt > night.txt
+sed s/day/night/ day.txt > night.txt
+# alternative delimiter, use any character you want:
+sed s_day_night_ day.txt > night.txt
+# from echo (note: only changes the first occurance)
+echo "today is a day" | sed s/day/night/
+# update a string using & to represent the matched string
+sed 's/day/&NOODLES' < day.txt > noodles.txt
+# double the matched string
+sed 's/day/& &/' < day.txt > double_day.txt
+# match any line starting with a numerical value & double the replacement
+sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt
+# match any number even if it doesn't start the line & double repalcement
+sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt
+#
+# using extended regular expressions
+# BSD -E works on mac
+# GNU -r works on linux
+sed -E 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # BSD
+sed -r 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # GNU
+
 ```
 
 ### ssh
@@ -209,8 +340,22 @@ find . -type f -name '*.txt' -exec sed -i '' 's/foo-bar/baz-shizzle/g' {} \;
 A command for executing commands on a remote machine via a secure shell connection.
 
 ```bash
-# TODO:
+# login to a remote machine
+ssh foo.bar.com
+# login to a remote machine, but specify a different username
+ssh -l user foo.bar.com
+ssh user@foo.bar.com
+# execute a command on a remote machine without actually logging into the shell prompt
+ssh user@foo.bar.com ls /some/dir
+# use an identity (private key) file  
+ssh -i /path/to/id_rsa user@food.bar.com
+# debug the ssh client
+ssh -v user@foo.bar.com
 ```
+
+### ssh-keygen
+
+### ssh-copy-id
 
 
 ### tar
