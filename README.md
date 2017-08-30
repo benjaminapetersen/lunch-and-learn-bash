@@ -66,11 +66,15 @@ probably the least friendly.
 
 `awk` command format is `awk 'pattern {action}' input-file > output-file`.
 
+The [grymoire](http://www.grymoire.com/Unix/Awk.html) is a good resource for awk as well.
+
+Since many unix programs generate text in rows and columns, `awk` is an important tool
+to know to process these files.  It is, to a degree, a programming language (though, imho,
+like most of bash, its not... elegant).
+
 ```bash
-
-
-
-
+# TODO: awk is complex enough you end up writing awk scripts
+# will come back to this in the future.
 ```
 
 
@@ -83,6 +87,31 @@ probably the least friendly.
 
 ```
 
+### diff
+
+`diff` compares files line by line and will print to `stdout` the lines that
+are  unique to each file. This is useful for a simple diff, when you know two
+files are very close to the same.  For more complex diffing, probably a more
+powerful tool is in order.
+
+```bash
+# ignore whitespace
+diff -w file1.txt file2.txt
+```
+
+### export
+
+View or create environment variables:
+
+```bash
+# view current environment variables
+export # dumps all the declare rules
+# view a specific environment variable
+export | grep USER
+export | grep GO  # shows GOPATH, GOROOT, etc
+# set an env var temporarily. To make permanent, add to .bash_profile, or other
+export SOME_VAR=/foo/bar/baz/shizzle
+```
 
 
 ### du
@@ -434,6 +463,10 @@ tar --apend --file=my-archive.tar some-file-to-add.txt
 tar --create --gzip --file=my-archive.tar.gz some-dir/
 tar -czf my-archive.tar.gz some-dir/
 ```
+
+### vim
+
+Vim will be handled separately (vast).d
 
 ### whatis
 
