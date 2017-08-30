@@ -1,0 +1,11 @@
+This is a file.
+This is a file with some NINNIES.
+THIS IS A FILE.
+THIS IS A FILE WITH SOME TEXT.
+hello world.
+HELLO WORLD.
+Hello world from a file with some NINNIES.
+HELLO WORLD FROM A FILE WITH SOME TEXT.
+HeLlO WoRlD fRoM a FiLe WiTh SoMe TeXt.
+123.456.7890
+xxx.yyy.zzzz

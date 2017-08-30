@@ -56,10 +56,55 @@ bash commands, using the following links as reference points:
 - http://www.thegeekstuff.com/2010/11/50-linux-commands
 -->
 
+### awk
+
+`awk` searches files for text containing patterns.  While `grep` is used only
+for search, `awk` (as well as `sed`) can modify the text in these files. `awk` is
+probably the least friendly.
+
+`awk` can be called a pattern scanning and processing language.
+
+`awk` command format is `awk 'pattern {action}' input-file > output-file`.
+
+```bash
+
+
+
+
+```
+
+
+### cat
+
+`cat` concatenates files and prints them on `stdout`.
+
+```bash
+
+
+```
+
+
+
+### du
+
+`du` is a utility for disk usage statistics
+
+```bash
+# display in human readable output. suffix Byte, Megabyte, etc
+du -h file.txt
+# grand total of some directory (if multiple files)
+du -c /some/dir
+#  follow symbolic links
+du -h /some/dir/with/symlink/file.txt
+# display an entry for each file in dir (same as -d 0)
+du -s /some/dir
+# display an entry for all files up to certain depth
+du -d 4 /some/dir
+```
 
 ### find
 
-Find is primarily concerned with finding files by name. It recursively searches a directory
+`find` is primarily concerned with finding files by name. It recursively searches a directory
 tree and evaluates an expression in terms of each file in the tree.
 
 <!--
@@ -119,10 +164,15 @@ find . -type f -name '*.txt' -exec sed -i '' 's/foo-bar/baz-shizzle/g' {} \;
 
 ### grep
 
-Grep stands for `g/re/p`, globally search a regular expression and print.  It is important to note that it is line based,
-so adjust your expectations (example: it won't match an expression multiple times in one line unless you explicitly ask).
+`grep` stands for `g/re/p`, globally search a regular expression and print.  
+It is important to note that it is line based,
+so adjust your expectations (example: it won't match an expression
+multiple times in one line unless you explicitly ask).
 
-Search file(s) for the occurrence of a string that matches some particular pattern. For more, [practical grep examples](http://www.thegeekstuff.com/2009/03/15-practical-unix-grep-command-examples/)
+`grep`'s basic job is to print lines matching some pattern.
+
+Search file(s) for the occurrence of a string that matches some particular pattern.
+For more, [practical grep examples](http://www.thegeekstuff.com/2009/03/15-practical-unix-grep-command-examples/)
 
 ```bash
 # search for a string in a single file
@@ -293,7 +343,9 @@ A command for securely copying files between hosts on a network using ssh for da
 
 ### sed
 
-Sed stands for `S`tream `Ed`itor. A great overview of sed [here](http://www.grymoire.com/Unix/Sed.html)
+`sed` stands for `S`tream `Ed`itor. A great overview of sed [here](http://www.grymoire.com/Unix/Sed.html).
+
+`sed`'s job is to filter and transform text from a text stream.
 
 The primary command for sed is substitute.  It has four parts:
   s                        substitue command
@@ -383,8 +435,17 @@ tar --create --gzip --file=my-archive.tar.gz some-dir/
 tar -czf my-archive.tar.gz some-dir/
 ```
 
+### whatis
 
+Perhaps the most important first command.  It tells you "what is" another
+command. It is a simpler start than `man`.
 
+```bash
+whatis find # find(1)                  - walk a file hierarchy
+whatis sed  # sed(1)                   - stream editor
+whatis grep # grep(1)                  - file pattern searcher
+# etc
+```
 
 
 ## Recipes
