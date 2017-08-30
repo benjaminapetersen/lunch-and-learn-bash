@@ -480,6 +480,44 @@ whatis grep # grep(1)                  - file pattern searcher
 # etc
 ```
 
+### xargs
+
+A utility used to take input from commands and build and execute new commands.
+`xargs` can break lists of arguments into sublists and execute other utilities
+multiple times per sublist. The word `sublist` is key, as `xargs` won't just
+call the following utility once per arg, but will "chunk" the arguments up in
+a much more efficient manner.
+[Wikipedia for some examples](https://en.wikipedia.org/wiki/Xargs).
+
+Note that the default argument list marker is `{}`.  It is essentially a placeholder
+for passing along arguments (somewhat like an array).
+
+```bash
+# pass the output of echo to echo again with xargs (noop)
+echo 1 2 3 4 | xargs echo
+# now, set a max number of args before xargs will call echo a second time
+echo 1 2 3 4 | xargs -n 2 # will call echo twice, once with 1 2, then 3 4
+#
+# a command can fail if it receives too many arguments.
+rm /path/*                # if many items in the path, will crash
+rm `find /path -type f`   # may also fail
+# to fix this, use xargs to chunk the arguments & call rm multiple times
+find /path -type f -print | xargs rm # functionally equivalent to rm `find /path -type f`
+#
+# INEFFICIENT alternatives:
+find /path -type f -exec rm '{}' \; # calls rm once per file. inefficient
+find /path -type f -exec rm '{}' + # modern variants of find can be more efficient, however
+#
+# inputs are typically terminated by whitespace, however, you can signal
+# to xargs that the termination is a null character
+find . -name "*.txt" -print0 | xargs -0
+find . -name "*.txt" -print0 | xargs --null
+# the argument list marker {} can be renamed to be more readable 
+# -I to replace occurrences of replace-str in the initial-arguments with names read from standard input.
+find . -name "*.bak" -print0 | xargs -0 -I {} mv {} ~/old_files                 # the usual marker
+find . -name "*.txt" -print0 | xargs --null -I the_file mv the_file ~/old_files # will move the_file
+```
+
 
 ## Recipes
 
