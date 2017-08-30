@@ -512,10 +512,16 @@ find /path -type f -exec rm '{}' + # modern variants of find can be more efficie
 # to xargs that the termination is a null character
 find . -name "*.txt" -print0 | xargs -0
 find . -name "*.txt" -print0 | xargs --null
-# the argument list marker {} can be renamed to be more readable 
+# the argument list marker {} can be renamed to be more readable
 # -I to replace occurrences of replace-str in the initial-arguments with names read from standard input.
 find . -name "*.bak" -print0 | xargs -0 -I {} mv {} ~/old_files                 # the usual marker
 find . -name "*.txt" -print0 | xargs --null -I the_file mv the_file ~/old_files # will move the_file
+# copy and move files
+ls *.files.to.move.txt | xargs -n1 -i cp {} /new/dir/for/files
+# move & archive files
+find / -name *.files.to.archive.txt -type f -print | xargs tar -cvzf some.backup.tar.gz
+# download all urls from an input file
+cat some-url-list.txt | xargs wget -c
 ```
 
 
