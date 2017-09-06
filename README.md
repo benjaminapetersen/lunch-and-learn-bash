@@ -416,6 +416,27 @@ sed -r 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # GNU
 
 ```
 
+### sort
+
+```bash
+# sort a file in ascending order (by line)
+sort file.txt
+# sort in descending order (reverse)
+sort -r file.txt
+# sort on a certain column (space between "columns", ie next word, etc)
+sort -k 2 file_with_columns.txt
+# sort multi column!
+sort -k,2 -k 1 file_with_columns.txt # first by column 2, then by column 1
+# sort with a field separator that isn't white space
+sort --field-separator'|' -k2 file_with_columns.txt # second column, broken with |
+sort -t'|' -k2 file_with_columns.txt
+# sort tab separated file
+sort -k 2 -t $'\t' file_with_tab_columns.txt # special character \t
+# pseudo random sort
+sort --random-sort file.txt #shuf util provides true random sort, this is simple hashing & incomplete
+sort -R file.txt
+```
+
 ### ssh
 
 A command for executing commands on a remote machine via a secure shell connection.
@@ -466,7 +487,19 @@ tar -czf my-archive.tar.gz some-dir/
 
 ### vim
 
-Vim will be handled separately (vast).d
+For more, see [docs/vim](docs/vim.md).
+
+```bash
+# go to particular line of file
+vim +<line_num> file.txt
+vim +135 file.txt
+# go to first match of search term
+vim +/<search_term> file.txt
+vim +/foo-bar-baz file.txt
+# open in redonly mode
+vim -R file.txt
+```
+
 
 ### whatis
 
