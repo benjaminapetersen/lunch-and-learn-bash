@@ -87,6 +87,10 @@ like most of bash, its not... elegant).
 
 ```
 
+### curl
+
+
+
 ### diff
 
 `diff` compares files line by line and will print to `stdout` the lines that
@@ -316,6 +320,9 @@ Ctrl+r # type search term, then repeat Ctrl+r until match
 ^shipple^shizzle^ # runs: foobar --baz=shizzle
 ```
 
+### less
+
+
 ### ln
 
 TODO: fill out ln
@@ -360,6 +367,23 @@ lsof -i
 lsof -i -a -p <pid>
 lsof -i -a -p 1234
 
+```
+
+### more
+
+### netstat
+
+Netstat (network statistics) lists network connections for TCP (transmission control protocol),
+[and other network related protocols](https://en.wikipedia.org/wiki/Netstat).
+
+This program is considered mostly obsolete.  It is superseded by `ss` and other tools.
+
+```bash
+# list all
+netstat --listen # gnu only
+netstat -l # bsd
+# search for specific port
+netstat -l | grep '<port-number>'
 ```
 
 ### scp
@@ -501,6 +525,9 @@ vim -R file.txt
 ```
 
 
+### wget
+
+
 ### whatis
 
 Perhaps the most important first command.  It tells you "what is" another
@@ -573,7 +600,21 @@ Some useful mixes of above commands to accomplish common tasks
 # s/apple/orange/g
 find ./ -type f -exec sed --in-place --expression 's/apple/orange/g' {} \;
 find ./ -type f -exec sed -i -e 's/apple/orange/g' {} \;
+```
 
+```bash
+# Kill a running task named <task-name>
+kill -9 $(ps -aux | grep -v "grep" | grep <task-name> | awk '{print $2}')
+# for example, a grunt task:
+kill -9 $(ps -aux | grep -v "grep" | grep grunt | awk '{print $2}')
+# explanation:
+# $() runs a series of commands and "returns" the output. it is modern version of `command`
+# kill is the command to end processes
+# -9 ensures the process is killed if it is stuck in a loop
+# ps -aux lists currently running processes
+# grep -v 'grep' exclude lines with `grep` so we dont accidentally kill current grep (redundant?)
+# grep grunt will return the line with the grunt process id
+# awk '{print $2}' returns the number in the second column, which is the pid
 ```
 
 ## Notes
