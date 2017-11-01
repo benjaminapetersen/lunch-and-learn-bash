@@ -20,6 +20,13 @@ Light Gray   0;37     White         1;37
 BLACK=\033[0;30
 GREEN=\033[0;32
 BLUE=\033[0;34
+
+RED='\033[0;31m'
+NOCOLOR='\033[0m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+
+
 # etc
 
 ```
