@@ -15,4 +15,32 @@ else
 fi
 
 
+if [ "$VAR1" -le 4 ]; then
+  # do things
+elif [ "$VAR2" -le 8 ]; then
+	# do other things
+else
+  # finally, do this other thing
+fi
 
+
+if [ "$menu" == "fish" ]; then
+  if [ "$animal" == "penguin" ]; then
+    echo "Hmmmmmm fish... Tux happy!"
+  elif [ "$animal" == "dolphin" ]; then
+    echo "Pweetpeettreetppeterdepweet!"
+  else
+    echo "*prrrrrrrt*"
+  fi
+else
+  if [ "$animal" == "penguin" ]; then
+    echo "Tux don't like that.  Tux wants fish!"
+    exit 1
+  elif [ "$animal" == "dolphin" ]; then
+    echo "Pweepwishpeeterdepweet!"
+    exit 2
+  else
+    echo "Will you read this sign?!"
+    exit 3
+  fi
+fi

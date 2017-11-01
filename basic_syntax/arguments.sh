@@ -9,7 +9,7 @@ echo "Total number of params: $#"
 
 # loop and print each token:
 for TOKEN in $*
-do 
+do
 	echo "- arg: $TOKEN"
 done
 
