@@ -90,6 +90,19 @@ like most of bash, its not... elegant).
 ### curl
 
 
+### date
+
+Can either print out the current date or change the system's date and time.
+
+```bash
+date                                      # Mon Nov 27 16:41:39 EST 2017
+date +%Y                                  # 2017
+date +"%Y"                                # 2017
+date +"the year is %Y and the day is %d"  # the year is 2017 and the day is 27
+date +"%Y %B %d, %a"                      # 2017 January 01, Sun
+date +%D                                  # 11/27/17
+```
+
 
 ### diff
 
@@ -285,6 +298,19 @@ git clean -d --force  # -d = directory
 git clean -df
 ```
 
+### head
+
+Print the first N number of lines from an input (usually a file), by default 10 lines.
+
+```bash
+head /usr/bin/passwd
+head -n 45 /usr/bin/passwd
+# print all BUT the last 5 lines
+head -n -5 /usr/bin/passwd
+# pass output of a command to head
+ls -la | head -n 5
+```
+
 ### history
 
 ```bash
@@ -386,6 +412,27 @@ netstat -l # bsd
 netstat -l | grep '<port-number>'
 ```
 
+
+### passwd
+
+Change the password of a user acct. Sys admins can use passwd to change other user's passwords. The
+command can also be used to define how an account's password can be changed, and can be used to expire
+a user's acct.
+
+Commands altering an acct may require root/sudo.
+
+```bash
+passwd                  # chance current user acct password
+passwd -S some_acct     # see the status of this user acct
+passwd -d some_acct     # delete the acct
+passwd -e some_acct     # expire the acct
+passwd -l some_acct     # lock an acct
+passwd -u some_acct     # unlock an acct
+passwd -n 90 some_acct  # require update in 90 days
+passwd -i 10 some_acct  # makes an acct inactive if it exceeds password update requirement by x days
+passwd -w 12 some_acct  # set warning days before password will expire for acct
+```
+
 ### scp
 
 A command for securely copying files between hosts on a network using ssh for data transfer.
@@ -483,6 +530,16 @@ ssh -v user@foo.bar.com
 
 ### ssh-copy-id
 
+### tail
+
+Print the last N number of lines from an input (usually a file), by default 10 lines.
+
+```bash
+tail /usr/bin/passwd
+tail -n 45 /usr/bin/passwd 
+# pass output of a command to tail
+ls -la | tail -n 5
+```
 
 ### tar
 
