@@ -130,6 +130,13 @@ export | grep GO  # shows GOPATH, GOROOT, etc
 export SOME_VAR=/foo/bar/baz/shizzle
 ```
 
+### exit 
+
+Exits the current shell session.
+
+```bash 
+exit 
+```
 
 ### du
 
@@ -146,6 +153,26 @@ du -h /some/dir/with/symlink/file.txt
 du -s /some/dir
 # display an entry for all files up to certain depth
 du -d 4 /some/dir
+```
+
+### file 
+
+The file command determines the type of a file. Some details 
+[here](https://www.computerhope.com/unix/ufile.htm).
+
+```bash 
+file file.txt # file.txt: ASCII text
+file --brief file.txt # ASCII text
+file -b file.txt # ASCII text
+# work on multiple files
+file -b *.txt 
+# view the MIME type of a file
+file --mime file.txt 
+file -i file.txt 
+file -i -b file.txt 
+# view compressed files without decompressing them 
+file -z file.txt.gz 
+
 ```
 
 ### find
@@ -395,6 +422,16 @@ lsof -i -a -p 1234
 
 ```
 
+### man 
+
+A command used to format and display the manual pages (man pages). More [on man here](http://www.linfo.org/man.html)
+ 
+```bash 
+man <cmd>
+man man # meta. 
+man ls 
+```
+
 ### more
 
 ### netstat
@@ -566,6 +603,70 @@ tar --create --gzip --file=my-archive.tar.gz some-dir/
 tar -czf my-archive.tar.gz some-dir/
 ```
 
+### usermod 
+
+Used to change the attributes of an existing user account. 
+When using `usermod`, the following files may be affected:
+
+- /etc/passwd – User account info.
+- /etc/shadow – Secure account info.
+- /etc/group – Group account info.
+- /etc/gshadow – Secure group account info.
+- /etc/login.defs – Shadow password suite info
+
+Information for `usermod` initially based on 
+[this article](https://www.tecmint.com/usermod-command-examples/).
+
+```bash 
+# add a comment to the user account 
+usermod -c "This guy is a n00b" bob 
+# change the home directory for a user 
+usermod -d /home/n00b bob  # previously was /home/bob
+# change the expiry date (check it initially with `chage`, "change user password expiry information")
+chage -l bob # shows expiry info 
+usermod -e 2018-01-01 bob 
+# change user's primary group (check it initially with `id`)
+id bob 
+usermod -g n00bs bob
+# add a new group to the user (and REPLACE existing!)
+usermod -G hobbits bob
+# add (append) an additional group to the user (will not REPLACE)
+usermod -a -G hobbits bob
+# change the user's login name 
+usermod -l bob_n00b bob
+# after the above, bob will not exist:
+id bob # nope 
+id bob_n00b # yup
+# lock a user account 
+usermod -L bob 
+# check to see if the acct is locked by viewing /etc/shadow 
+grep -E --color 'bob' cat /etc/shadow # color output is handy 
+# unlock the acct 
+usermod -U bob
+# move the user's home dir to a new location: 
+usermod -d /home/bob_n00b -m bob
+# verify the change in location 
+grep -E --color 'bob_n00b' /etc/passwd
+ls -l /home/bob 
+ls -l /home/bob_n00b
+# create an unencrypted password 
+usermod -p n00bery bob
+# verify the change 
+grep -E --color 'n00bery' /etc/shadow # bad! the password is not encrypted
+# change the user's shell 
+usermod -s /bin/bash bob
+# verify the change 
+grep -E --color 'bob' /etc/passwd
+# change the user id 
+usermod -u 888 bob 
+# verify the change 
+id bob
+# change both the uid and the gid of the user 
+usermod -u 888 -g 777 bob 
+# verify
+id bob
+```
+
 ### vim
 
 For more, see [docs/vim](docs/vim.md).
@@ -595,6 +696,20 @@ whatis find # find(1)                  - walk a file hierarchy
 whatis sed  # sed(1)                   - stream editor
 whatis grep # grep(1)                  - file pattern searcher
 # etc
+```
+
+### wc 
+
+Counts lines, words and characters in a file. 
+
+```bash 
+wc /etc/passwd 
+# just lines 
+wc -l /etc/passwd 
+# just words 
+wc -w /etc/passwd 
+# just characters 
+wc -c /etc/passwd  
 ```
 
 ### xargs
