@@ -46,6 +46,37 @@ PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 
 ```
 
+## Editing the command line 
+
+Bash has some command line editing features that can save time.  
+
+- Ctrl + a  # jump to the beginning of the line 
+- Ctrl + e  # jump to the end of the line 
+- Ctrl + u  # clear the cursor to the beginning of the line 
+- Ctrl + k  # clear the cursor to the end of the line 
+- Ctrl + left arrow # jump to the beginning of the previous word 
+- Ctrl + right arrow # jump to the end of the next word
+- Ctrl + r  # search the history list of commands for a pattern (continue Ctrl + r till desired match found)
+
+NOTE: on OSX, you have some (bizarre?) alternatives:
+
+- Esc + f  # jump to beginning of next word 
+- Esc + b  # jump to the beginning of the current word
+- More [at this link](https://stackoverflow.com/questions/81272/is-there-any-way-in-the-os-x-terminal-to-move-the-cursor-word-by-word)
+
+
+## Addtional tips/tricks 
+
+- Esc .     # retrieve the last arg of last command 
+- Alt .     # retrieve the last arg of last command 
+- !$        # retrieve the last arg of the last command 
+- !:1       # retrieve the first arg of the last command 
+- !:1-2     # retrieve the first and second arg of the last command 
+- !^        # retrieve the first arg of the last command 
+- !!:2      # execute prev command (!!) but only with the second arg to the prev command 
+- !pattern  # most recent command matching pattern 
+- 
+
 ## Some basic bash commands
 
 The following is a list of fundamental commands.  It is important to have a working knowledge of each of these.
@@ -101,6 +132,7 @@ date +"%Y"                                # 2017
 date +"the year is %Y and the day is %d"  # the year is 2017 and the day is 27
 date +"%Y %B %d, %a"                      # 2017 January 01, Sun
 date +%D                                  # 11/27/17
+date +%r                                  # 10:14:06 AM
 ```
 
 
@@ -371,6 +403,9 @@ Ctrl+r # type search term, then repeat Ctrl+r until match
 # example previous command:
 #  foobar --baz=shipple
 ^shipple^shizzle^ # runs: foobar --baz=shizzle
+# copy the last argument of hte previous command 
+# useful for reusing args with a new command
+Esc+.
 ```
 
 ### less
