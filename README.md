@@ -660,8 +660,26 @@ A command used to format and display the manual pages (man pages). More [on man 
 ```bash
 man <cmd>
 man man # meta.
+man <topic>
 man ls
 ```
+
+Navigating man pages works like the following:
+
+- Spacebar    # Scroll forward (down) one screen
+- PageDown    # Scroll forward (down) one screen
+- PageUp      # Scroll backward (up) one screen
+- DownArrow   # Scroll forward (down) one line
+- UpArrow     # Scroll backward (up) one line
+- d           # Scroll forward (down) one half-screen
+- u           # Scroll backward (up) one half-screen
+- / string    # Search forward (down) for string in the man page
+- n           # Repeat previous search forward (down) in the man page
+- N           # Repeat previous search backward (up) in the man page
+- g           # Go to start of the man page.
+- G           # Go to end of the man page.
+- q           # Exit man and return to the command shell prompt
+
 
 ### mkdir
 
