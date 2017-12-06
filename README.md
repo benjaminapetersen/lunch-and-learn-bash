@@ -46,36 +46,105 @@ PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 
 ```
 
-## Editing the command line 
+## Editing the command line
 
 Bash has some command line editing features that can save time.  
 
-- Ctrl + a  # jump to the beginning of the line 
-- Ctrl + e  # jump to the end of the line 
-- Ctrl + u  # clear the cursor to the beginning of the line 
-- Ctrl + k  # clear the cursor to the end of the line 
-- Ctrl + left arrow # jump to the beginning of the previous word 
+- Ctrl + a  # jump to the beginning of the line
+- Ctrl + e  # jump to the end of the line
+- Ctrl + u  # clear the cursor to the beginning of the line
+- Ctrl + k  # clear the cursor to the end of the line
+- Ctrl + left arrow # jump to the beginning of the previous word
 - Ctrl + right arrow # jump to the end of the next word
 - Ctrl + r  # search the history list of commands for a pattern (continue Ctrl + r till desired match found)
 
 NOTE: on OSX, you have some (bizarre?) alternatives:
 
-- Esc + f  # jump to beginning of next word 
+- Esc + f  # jump to beginning of next word
 - Esc + b  # jump to the beginning of the current word
 - More [at this link](https://stackoverflow.com/questions/81272/is-there-any-way-in-the-os-x-terminal-to-move-the-cursor-word-by-word)
 
 
-## Addtional tips/tricks 
+## Addtional tips/tricks
 
-- Esc .     # retrieve the last arg of last command 
-- Alt .     # retrieve the last arg of last command 
-- !$        # retrieve the last arg of the last command 
-- !:1       # retrieve the first arg of the last command 
-- !:1-2     # retrieve the first and second arg of the last command 
-- !^        # retrieve the first arg of the last command 
-- !!:2      # execute prev command (!!) but only with the second arg to the prev command 
-- !pattern  # most recent command matching pattern 
-- 
+- Esc .     # retrieve the last arg of last command
+- Alt .     # retrieve the last arg of last command
+- !$        # retrieve the last arg of the last command
+- !:1       # retrieve the first arg of the last command
+- !:1-2     # retrieve the first and second arg of the last command
+- !^        # retrieve the first arg of the last command
+- !!:2      # execute prev command (!!) but only with the second arg to the prev command
+- !pattern  # most recent command matching pattern
+
+
+## Globbing / Expansion
+
+Bash supports globbing (pattern matching).  Therefore any/many/most commands should
+be able to integrate the following:
+
+```bash
+*             # any set of zero or more charcters
+?             # any single character
+~             # home dir
+~ username    # home dir of a user
+~+            # current working directory
+~-            # previous working dir
+[abc...]      # Any one character in the enclosed set/class.
+[!abc...]     # Any one character not in the enclosed set/class.
+[^abc...]     # Any one character not in the enclosed set/class.
+[[:alpha:]]   # Any alphabetic character
+[[:lower:]]   # Any lower-case character
+[[:upper:]]   # Any upper-case character
+[[:alnum:]]   # Any alphabetic character or digit
+[[:punct:]]   # Any printable character not a space or alphanumeric
+[[:digit:]]   # Any digit, 0-9
+[[:space:]]   # Any one whitespace character;
+              # may include tabs, newline, or carriage returns,
+              # and form feeds as well as space
+```
+
+Some examples:
+
+```bash
+# setup a space to do these tests:
+mkdir globbing
+cd globbing
+touch foo bar baz alfa bravo charlie delta echo able baker candle dog elephant
+# now try globbing
+ls a*             # should match alfa, able
+ls *a*            # match anything with an a start, middle or end of word
+ls [ac]*          # match anything with an a or a c  
+ls [!a]*          # match files not starting with a
+ls ????           # match anything with 4 characters
+ls ?????          # match anything with 5 characters
+ls ???*           # match files with at least 3 characters
+ls *[[:digit:]]*  # match files that contain a number
+ls [[:upper:]]*   # match files starting with an uppercase character
+```
+
+## Brace Expansion
+
+```bash
+echo {foo,bar,baz,shizzle}.log
+# foo.log bar.log baz.log shizzle.log
+echo file{1..3}.txt
+# file1.txt file2.txt file4.txt
+echo file{a..c}.txt
+# filea.txt fileb.txt filec.txt
+echo file{a,b}{1,2}.txt
+# filea1.txt filea2.txt fileb1.txt fileb2.txt
+echo file{a{1,2},b,c}.txt
+# filea1.txt filea2.txt fileb.txt filec.txt
+```
+
+## Command substitution
+
+```bash
+echo Today is `date +%A`.
+# Today is Monday.
+echo The time is $(date +%M) minutes past $(date +%l%p)
+# The time is 15 minutes past 12pm
+```
 
 ## Some basic bash commands
 
@@ -116,6 +185,43 @@ like most of bash, its not... elegant).
 ```bash
 
 
+```
+
+### cd
+
+Change directory
+
+```bash
+cd /foo/bar
+# return to the directory you were previously
+cd -
+# go up one directory
+cd ..
+# go up two directories
+cd ../..
+# return to your home directory
+cd
+# move to the binaries location
+cd /bin
+# move to the binaries location from root
+cd bin
+```
+
+### cp
+
+Copy file(s).  Be careful, if new file name is not unique,
+the cp command will overwrite the existing file.
+
+```bash
+cp file.txt file2.txt
+# copy file(s) into a directory
+cp file.txt file2.txt some/dir
+# copy a non-empty directory
+cp -r ./dir ./dir2
+# copy multiple files to current dir
+cp ../file.txt ../file2.txt .
+# copy multiple directories to current dir
+cp -r ../dir ../dir2 ../dir3 ../dir4 .
 ```
 
 ### curl
@@ -162,12 +268,12 @@ export | grep GO  # shows GOPATH, GOROOT, etc
 export SOME_VAR=/foo/bar/baz/shizzle
 ```
 
-### exit 
+### exit
 
 Exits the current shell session.
 
-```bash 
-exit 
+```bash
+exit
 ```
 
 ### du
@@ -187,23 +293,23 @@ du -s /some/dir
 du -d 4 /some/dir
 ```
 
-### file 
+### file
 
-The file command determines the type of a file. Some details 
+The file command determines the type of a file. Some details
 [here](https://www.computerhope.com/unix/ufile.htm).
 
-```bash 
+```bash
 file file.txt # file.txt: ASCII text
 file --brief file.txt # ASCII text
 file -b file.txt # ASCII text
 # work on multiple files
-file -b *.txt 
+file -b *.txt
 # view the MIME type of a file
-file --mime file.txt 
-file -i file.txt 
-file -i -b file.txt 
-# view compressed files without decompressing them 
-file -z file.txt.gz 
+file --mime file.txt
+file -i file.txt
+file -i -b file.txt
+# view compressed files without decompressing them
+file -z file.txt.gz
 
 ```
 
@@ -391,8 +497,11 @@ While not explicitly using `history`, the following work off of the history file
 # run first matching command by search word (DANGEROUS!)
 !<term>
 !fooba  # would run foobar --baz=shizzle
-# run the first command that matches <search-term>
+# run the first command that matches pattern <search-term>
+!?foo?:p
 !?foobar --baz=shizzle?
+# print the first command that matches, don't run it
+!?foo?:p
 # run previous command by number of indexes back in search
 !-2
 # run command at history index
@@ -403,10 +512,36 @@ Ctrl+r # type search term, then repeat Ctrl+r until match
 # example previous command:
 #  foobar --baz=shipple
 ^shipple^shizzle^ # runs: foobar --baz=shizzle
-# copy the last argument of hte previous command 
+# copy the last argument of hte previous command
 # useful for reusing args with a new command
 Esc+.
 ```
+
+### jq
+
+This is not built-in.  Install:
+
+```bash
+# Debian/Ubuntu
+sudo apt-get install jq
+# Fedora
+sudo dnf install jq
+# OSX
+brew install jq
+```
+
+jq is a [JSON query](https://stedolan.github.io/jq/tutorial/) program.
+
+```bash
+# output unchanged
+curl 'https://foo.com/api/stuff?limit=5' | jq '.'
+# get first
+curl 'https://foo.com/api/stuff?limit=5' | jq '.[0]'
+# get first, but only certain fields
+# | is used within the jq query string to pipe one query to the next
+jq '.[0] | {message: .commit.message, name: .commit.committer.name}'
+```
+
 
 ### less
 
@@ -418,6 +553,67 @@ TODO: fill out ln
 ```bash
 # symbolic link
 ln -s ~/dotfiles/foo ./.foo
+```
+
+### ls
+
+List directory contents for either a specified directory, or the
+current working directory
+
+```bash
+# list files
+ls
+# list files in home dir
+ls ~
+ls -l ~
+# include hidden files
+ls -a
+ls -A  # but don't display . and ..
+# reverse order
+ls -r
+# sort alphabetically by file extension
+ls -X
+# sort based on modification time
+ls -t
+# list subdirectories recursively
+# (this could get big)
+ls -R
+# list file name with inode numbers
+ls -i
+# list files with details (long list format)
+# this shows actual file size (amount of data it contains),
+ls -l
+# list files with size of the file on the file system / allocated size (this can be different than above ls -l)
+ls -s
+ls -s --block-size=k foo/bar/baz/*.txt
+# list only file name and size
+ls -s -h
+# list files with indicator for type of file
+# (ls typically color coded, but if you want a character
+# instead to indicate directory, executable, etc)
+#   @ indicates a symbolic link
+#   * indicates an executable
+#   = indicates a socket file
+#   | indicates a named pipe
+#   > indicates a door
+#   / indicates a directory
+#   list file with author
+ls -F
+# list file with author
+ls --author
+# print C-style escape characters for non-printables
+# (new lines in file name, etc)
+ls -b
+# print file sizes using kilobytes or other preferred size
+ls -l --block-size=k
+# change the output format
+# options are 'verbose' or 'long', 'commas', 'horizontal'
+# or 'across', 'vertical', and 'single-column'.
+ls --format=commas
+# hide certain types of files
+ls --hide=*.txt
+# list contents of multiple directories
+ls -l Pictures Movies Videos
 ```
 
 ### lsof
@@ -457,17 +653,42 @@ lsof -i -a -p 1234
 
 ```
 
-### man 
+### man
 
 A command used to format and display the manual pages (man pages). More [on man here](http://www.linfo.org/man.html)
- 
-```bash 
+
+```bash
 man <cmd>
-man man # meta. 
-man ls 
+man man # meta.
+man ls
+```
+
+### mkdir
+
+Create directory(ies)
+
+```bash
+mkdir ./dir
+# create parent directories if they do not exist
+# beware of spelling mistakes! there will be no error
+# output for accidentally created directories
+mkdir -p foo/bar/baz/dir  
 ```
 
 ### more
+
+### mv
+
+Rename file(s) in the same directory, or relocate to a new
+directory.
+
+```bash
+mv file.txt file2.txt
+# move a directory
+mv ./dir ./dir2
+# move multiple files to a directory
+mv file.txt file2.txt file3.txt ./files
+```
 
 ### netstat
 
@@ -503,6 +724,44 @@ passwd -u some_acct     # unlock an acct
 passwd -n 90 some_acct  # require update in 90 days
 passwd -i 10 some_acct  # makes an acct inactive if it exceeds password update requirement by x days
 passwd -w 12 some_acct  # set warning days before password will expire for acct
+```
+
+### pwd
+
+Print working directory, displays the full path of the current
+working directory
+
+```bash
+pwd
+# /home/student/projects/foo
+```
+
+### rm
+
+Remove file(s).  May be recursive.
+Beware, there is no `undelete`, and no trash bin to get
+your files back out of!
+
+```bash
+rm file.txt
+# force delete
+# BEWARE!
+rm -f file.txt file2.txt file3.txt
+# remove directory
+rm -r ./dir
+# remove multiple directories
+rm -r ./dir ./dir2 ./dir3
+# INTERACTIVE remove, to ask you "are you sure" for each
+rm -ri ./dir
+```
+
+### rmdir
+
+Remove empty directory
+
+```bash
+rmdir ./dir
+rmdir /foo/bar/baz
 ```
 
 ### scp
@@ -608,7 +867,7 @@ Print the last N number of lines from an input (usually a file), by default 10 l
 
 ```bash
 tail /usr/bin/passwd
-tail -n 45 /usr/bin/passwd 
+tail -n 45 /usr/bin/passwd
 # pass output of a command to tail
 ls -la | tail -n 5
 ```
@@ -638,9 +897,18 @@ tar --create --gzip --file=my-archive.tar.gz some-dir/
 tar -czf my-archive.tar.gz some-dir/
 ```
 
-### usermod 
+### touch
 
-Used to change the attributes of an existing user account. 
+Update a file's timestamp to the current date w/o modification
+of the file.  If the file doesn't exist, create an empty file.
+
+```bash
+touch foo/bar/baz.txt
+```
+
+### usermod
+
+Used to change the attributes of an existing user account.
 When using `usermod`, the following files may be affected:
 
 - /etc/passwd – User account info.
@@ -649,55 +917,55 @@ When using `usermod`, the following files may be affected:
 - /etc/gshadow – Secure group account info.
 - /etc/login.defs – Shadow password suite info
 
-Information for `usermod` initially based on 
+Information for `usermod` initially based on
 [this article](https://www.tecmint.com/usermod-command-examples/).
 
-```bash 
-# add a comment to the user account 
-usermod -c "This guy is a n00b" bob 
-# change the home directory for a user 
+```bash
+# add a comment to the user account
+usermod -c "This guy is a n00b" bob
+# change the home directory for a user
 usermod -d /home/n00b bob  # previously was /home/bob
 # change the expiry date (check it initially with `chage`, "change user password expiry information")
-chage -l bob # shows expiry info 
-usermod -e 2018-01-01 bob 
+chage -l bob # shows expiry info
+usermod -e 2018-01-01 bob
 # change user's primary group (check it initially with `id`)
-id bob 
+id bob
 usermod -g n00bs bob
 # add a new group to the user (and REPLACE existing!)
 usermod -G hobbits bob
 # add (append) an additional group to the user (will not REPLACE)
 usermod -a -G hobbits bob
-# change the user's login name 
+# change the user's login name
 usermod -l bob_n00b bob
 # after the above, bob will not exist:
-id bob # nope 
+id bob # nope
 id bob_n00b # yup
-# lock a user account 
-usermod -L bob 
-# check to see if the acct is locked by viewing /etc/shadow 
-grep -E --color 'bob' cat /etc/shadow # color output is handy 
-# unlock the acct 
+# lock a user account
+usermod -L bob
+# check to see if the acct is locked by viewing /etc/shadow
+grep -E --color 'bob' cat /etc/shadow # color output is handy
+# unlock the acct
 usermod -U bob
-# move the user's home dir to a new location: 
+# move the user's home dir to a new location:
 usermod -d /home/bob_n00b -m bob
-# verify the change in location 
+# verify the change in location
 grep -E --color 'bob_n00b' /etc/passwd
-ls -l /home/bob 
+ls -l /home/bob
 ls -l /home/bob_n00b
-# create an unencrypted password 
+# create an unencrypted password
 usermod -p n00bery bob
-# verify the change 
+# verify the change
 grep -E --color 'n00bery' /etc/shadow # bad! the password is not encrypted
-# change the user's shell 
+# change the user's shell
 usermod -s /bin/bash bob
-# verify the change 
+# verify the change
 grep -E --color 'bob' /etc/passwd
-# change the user id 
-usermod -u 888 bob 
-# verify the change 
+# change the user id
+usermod -u 888 bob
+# verify the change
 id bob
-# change both the uid and the gid of the user 
-usermod -u 888 -g 777 bob 
+# change both the uid and the gid of the user
+usermod -u 888 -g 777 bob
 # verify
 id bob
 ```
@@ -733,17 +1001,17 @@ whatis grep # grep(1)                  - file pattern searcher
 # etc
 ```
 
-### wc 
+### wc
 
-Counts lines, words and characters in a file. 
+Counts lines, words and characters in a file.
 
-```bash 
-wc /etc/passwd 
-# just lines 
-wc -l /etc/passwd 
-# just words 
-wc -w /etc/passwd 
-# just characters 
+```bash
+wc /etc/passwd
+# just lines
+wc -l /etc/passwd
+# just words
+wc -w /etc/passwd
+# just characters
 wc -c /etc/passwd  
 ```
 
