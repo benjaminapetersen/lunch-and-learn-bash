@@ -285,6 +285,8 @@ curl --header "Host:" http://www.example.com
 curl --header "Destination:http://example2.com" http://www.example.com
 # dump a trace as ascii to a file
 curl http://www.example.com --trace-ascii trace.ascii.txt
+# with a bearer token
+curl --insecure -H "Authorization: Bearer <some-token>" https://example.com 
 ```
 
 ### date
@@ -525,7 +527,7 @@ git clean -df
 
 ### head
 
-Print the first N number of lines from an input (usually a file), by default 10 lines.
+Print the first N number of lines from an input (usually a file but could be any input), by default 10 lines.
 
 ```bash
 head /usr/bin/passwd
@@ -534,6 +536,9 @@ head -n 45 /usr/bin/passwd
 head -n -5 /usr/bin/passwd
 # pass output of a command to head
 ls -la | head -n 5
+# limit number of lines returned from another command 
+# note that if this command prints headers, the header line will count as the first returned line!
+kubectl get pods | head -n 2
 ```
 
 ### history
@@ -782,6 +787,151 @@ netstat -l # bsd
 # search for specific port
 netstat -l | grep '<port-number>'
 ```
+
+### openssl
+
+The `openssl` tool is a full suite of tools for cryptography as well as TLS and SSL protocols.
+[Home page](https://www.openssl.org/) and [list of commands](https://www.openssl.org/docs/manmaster/man1/).
+
+It is not the most approachable tool, but it is really powerful.
+
+For some background info on file names, formats, etc, [read this stackoverflow](https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file).
+
+For a longer introduction, see [A Six Part OpenSSL Tutorial](https://www.keycdn.com/blog/openssl-tutorial)
+
+A helpful referecnce for generating a CSR [Geneate CSR](https://www.digicert.com/ssl-support/openssl-quick-reference-guide.htm).
+
+The modern internet relies on the PKI (Publik Key Infrastructure) trust.  This is pretty important stuff.
+
+A few items of interest:
+- `X.509` [X.509](https://en.wikipedia.org/wiki/X.509) is a standard defining the format of public key certificates.  Included in TLS/SSL for HTTPS protocol, among others.
+- `.csr` Certificate signing request to submit to certificate authorities. Format PKCS10 from RFC 2986. Contains the public key of the cert to be signed.  Returned certificate is the public certificate (contains public key, not private key).
+- `.pem` Privacy Enhanced Mail format. RFC 1421-1424. May be just the public cert, or may be entire cert chain including public key, private key, and root certificates.  May also encode a CSR. The method to secure mail failed, but the format remains useful. PEM is base64 of x509 ASN.1 keys.  Typically (apache) lives in `etc/ssl/certs`.
+- `.key` MEP formatted file of private-key of a specific certificate. Typically (apache) lives in `/etc/ssl/private`. The permissions on this file are very important and many programs will not load it if the permissions are incorrect.
+- `.pkcs`, `.pfx` RFC 7292, this is a passworded container format.  Contains public and private cert pairs.  Fully encrypted, unlike PEM files.
+- `sha` Secure Hashing Algorithm
+- `ssl` Secure Socket Layer
+- `tls` Transport Layer Security
+
+#### Basic commands
+
+```bash 
+# openssl version
+openssl version
+openssl version -a
+# list all command options
+openssl list
+# list standard commands
+openssl list-standard-commands
+# list cyphers only
+openssl list -cipher-commands
+# generate a public and private key
+# the public key is 
+openssl genrsa -out key.pem 1024
+# view the key
+cat key.pem 
+# view all the details in human friendly format
+# this includes exponents, modulus, primes, etc
+openssl rsa -in key.pem -text 
+# view the details, but prevent key itself from being displayed in base64 format
+# only hexadecimals will be displayed
+# public exponent will still be displayed.  it is always 65537 for 1024 keys.
+openssl rsa -in key.pem -text -noout
+# encrypt the private key
+openssl rsa -in key.pem -des3 -out enc-key.pem
+# extract public key 
+openssl rsa -in key.pem -pubout -out pub-key.pem
+# encrypt a file using keys
+# note that since using RSA, file must be less than 116 bytes.
+openssl pkeyutl -encrypt -in input.txt -inkey key.pem -out output.bin
+# decrypt the same file by flipping the flag & inputs
+openssl pkeyutl -decrypt -in output.bin -inkey key.pem -out output.decrypt.bin
+
+echo "sign me" > sign-me.txt && \
+  openssl dgst -sha256 < sign-me.txt > signme.hash
+# then sign the hash 
+# creates a file something like:
+#    <padding><metadata><hash of input>
+openssl dgst -sha256 -sign key.pem -out signme.hash.signature signme.hash
+# then verify the signature of the hash against the hash (with the associated public key)
+openssl dgst -sha256 -verify pub-key.pem -signature signme.hash.signature signme.hash
+# verify the integrity of the payload?
+# TODO:
+# create a hash of data
+# compute a digest value for a large file to make the digital signature verification more efficient
+# verifyme.digest will look something like: SHA256(verifyme.txt)= 838b0a...
+openssl dgst -<hash_algorithm> -out <digest> <input_file>
+echo "verify me" > verifyme.txt && openssl dgst -sha256 -out verifyme.digest verifyme.txt
+# compute the signature of the digest file
+openssl pkeyutl -sign -in verifyme.digest -out verifyme.digest.signature -inkey key.pem
+# check the validity of the signature
+openssl pkeyutl -verify -sigfile verifyme.digest.signature -in verifyme.digest -inkey key.pem
+openssl pkeyutl -verify -sigfile verifyme.digest.signature -in verifyme.digest -inkey key.pem -pubin
+# generate a certificate signing request
+openssl req -new -key yourdomain.key -out yourdomain.csr
+# generate, but provide details with -subj instead of the prompts
+openssl req -new -key yourdomain.key -out yourdomain.csr \
+  -subj "/C=US/ST=NC/L=Raleigh/O=Your Company, Inc./OU=IT/CN=yourdomain.com"
+# generate a private key and a csr in one step
+openssl req -new \
+  -newkey rsa:2048 -nodes -keyout yourdomain.key \
+  -out yourdomain.csr \
+  -subj "/C=US/ST=NC/L=Raleigh/O=Your Company, Inc./OU=IT/CN=yourdomain.com"
+# verify the csr to ensure information is correct and the file has not been tampered with
+# -noout omits encoded keys
+# -verify ensures file has not been modified
+openssl req -text -in yourdomain.csr -noout -verify
+```
+
+#### Symmetric Encryption 
+
+Note that you should obviously not keep the plain text of the secret message on disk next to the encrypted.
+
+```bash 
+# encrypt a message and write it to a file
+echo "secret number 12345" > plain.txt && \ 
+  openssl enc -aes-256-cbc -base64 -in plain.txt > secret.bin 
+# decrypt the message and write to a file
+openssl enc -aes-256-cbc -d -base64 -in secret.bin > secret.decrypt.txt
+```
+
+#### Asymmetric Encryption with public.key and private.pem
+Typically, asymmetric encryption and decryption would be done with 2 parties, exchanging their public.keys.  This allows 
+each party to use the public.key of the other party to encrypt, send the data, and let the other party decrypt the data 
+with the associated private.pem.
+
+```bash 
+# generate a private key
+openssl genrsa -out private.pem 2048
+# view a private key
+# includes both primes, coefficient, modulus, etc
+# this is very insightful 
+openssl  rsa -in private.pem -text
+# generate a public key using a private pem
+openssl rsa  -in private.pem -pubout -out public.key
+# encrypt file using openssl + public.key
+echo "secret number 12345" > plain.txt && \
+  openssl rsautl -encrypt -in plain.txt -out secret.bin -inkey secret.key -pubin
+# decrypt file using openssl + private.pem
+ openssl rsautl -decrypt -in secret.bin  -out secret.decrypt.txt -inkey private.pem
+```
+Sign and verify 
+
+```bash
+# use the private key to sign a message
+openssl rsautl -sign -in plain.txt -out secret.signed.bin -inkey private.pem
+# verify the signed message
+openssl rsautl -verify -in secret.signed.bin -out secret.signed.verified.txt -inkey public.key -pubin
+```
+
+Encrypt the private key
+
+```bash
+# don't store a private key on disk in plain text!
+# note that the header & footer ---RSA PRIVATE KEY--- text will remain, but the key itself will be encrypted
+openssl rsa -in private.pem -des3 -out private.encrypt.pem
+```
+
 
 
 ### passwd
