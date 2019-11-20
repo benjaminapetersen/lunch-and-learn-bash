@@ -146,6 +146,162 @@ echo The time is $(date +%M) minutes past $(date +%l%p)
 # The time is 15 minutes past 12pm
 ```
 
+# Parameter substitution
+
+Some useful tools and tricks around parameter substitution.  For [more](http://www.tldp.org/LDP/abs/html/parameter-substitution.html)
+
+```bash 
+# best practice, always quote strings and use this form:
+echo "name is ${first_name} ${middle_name} ${last_name}"
+echo "Old \$PATH = $PATH"
+```
+
+```bash 
+# use defaulting 
+PRIMARY=1
+BACKUP=2
+echo "The value is ${PRIMARY-$BACKUP}"
+# defaulting, if a var is declared but null 
+SECONDARY=
+BACKUPAGAIN=2
+echo "The value is ${SECONDARY:-$BACKUPAGAIN}"
+```
+
+```bash 
+# use defaulting to provide "missing" args to command line scripts
+DEFAULT_FILENAME=foobar.txt
+filename=${1:-$DEFAULT_FILENAME}
+echo "The filename is ${filename}"
+```
+
+```bash 
+# can use defaulting inline, but do note, this reads in a misleading way 
+echo ${var=abc} # abc 
+echo ${var=zyx} # still abc!  this is defaulting, despite the =
+```
+
+```bash
+# opposite of default, set an alternative value if the value HAS been set
+foo=
+bar=${foo+xyz}
+echo "bar = ${bar}" # xyz, was set, but null
+baz=123
+qux=${baz+xyz}
+echo "qux = ${qux}" # xyz, was set to a value
+shizzle=${pop+xyz}
+echo "shizzle = ${shizzle}" # nothing, pop had no value, was not set
+# oh but watch out for that : 
+jack=
+jane=${jack:+xyz}
+echo "jane = ${jane}" # nothing. jack was set null, like above, but the : will ignore null
+```
+
+```bash
+# trim strings 
+url="http://example.com:8443"
+# trim from the beginning of a string
+without_http=${foo#"http://"}
+# trim from the end of a string
+without_port=${foo%":8443"}
+```
+
+## Control flow
+
+### If statements
+
+Basic if statement 
+
+```bash 
+# -gt greater than
+if [ $1 -gt 100 ]
+then
+  echo "arg is greater than 100"
+fi
+```
+
+Nested if statement
+
+```bash 
+
+if [ $1 -gt 100 ]
+then
+  echo "arg is greater than 100"
+  if (( $1 % 2 == 0 ))
+  then
+    echo "arg is an even number"
+  fi
+fi
+```
+
+If else statement
+
+```bash 
+if [ $1 -gt 100 ]
+then
+  echo "arg is greater than 100"
+else 
+  echo "arg is smaller than 100"
+fi
+```
+
+If elseif else statement 
+
+```bash 
+# -gt greater than
+# -lt less than 
+if [ $1 -gt 100 ]
+then
+  echo "arg is greater than 100"
+elif [ $1 -lt 10 ]
+then
+  echo "arg is less than 10"
+else
+  echo "arg is mid range"
+fi
+```
+
+### Boolean statements
+
+```bash
+# -r is readable
+# -s is size
+if [ -r $1 ] && [ -s $1 ]
+then
+  echo "file is readable and not empty"
+fi
+```
+
+```bash 
+if [ $USER == 'john' ] || [ $USER == 'jane' ]
+then
+  echo "known user"
+else
+  echo "unknown user"
+fi
+```
+
+### Case statement 
+
+```bash 
+# end of statement with ;; 
+# * represents any number of any char, as the last case
+case $1 in
+  start)
+    echo starting
+    ;;
+  stop)
+    echo stoping
+    ;;
+  restart)
+    echo restarting
+    ;;
+  *)
+    echo don\'t know
+    ;;
+esac
+```
+
+
 ## Some basic bash commands
 
 The following is a list of fundamental commands.  It is important to have a working knowledge of each of these.
@@ -813,7 +969,7 @@ A few items of interest:
 - `ssl` Secure Socket Layer
 - `tls` Transport Layer Security
 
-#### Basic commands
+#### Basic Commands
 
 ```bash 
 # openssl version
@@ -825,6 +981,38 @@ openssl list
 openssl list-standard-commands
 # list cyphers only
 openssl list -cipher-commands
+```
+
+#### Ciphers
+
+See the [ciphers manual page](https://www.openssl.org/docs/manmaster/man1/ciphers.html).
+
+```bash
+# see the list of supported ciphers
+openssl ciphers
+# split the list out in a more readable format, its long and : separated
+openssl ciphers | tr ":" "\n "
+# select a cipher list and use to connect to a domain. lists are : separated and the first match will be chosen
+openssl s_client \
+  -cipher ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES256-GCM-SHA384 \
+  -connect example.com:443
+# cipher list can also be a group, based on required features. these will be pattern matched
+#   example: require ephemeral ECDH agreement, RSA for authentication, and only "high" encryption:
+#   from https://security.stackexchange.com/questions/93143/how-to-pass-cipher-list-to-openssl-s-client
+openssl s_client -cipher ECDH+aRSA+HIGH -connect example.com:443
+```
+
+#### Client Tools 
+
+```bash 
+# connect to a server with hostname & port
+openssl s_client -connect <domain>:<port>
+openssl s_client -connect example.com:443
+```
+
+#### Cryptography
+
+```bash 
 # generate a public and private key
 # the public key is 
 openssl genrsa -out key.pem 1024
