@@ -611,6 +611,8 @@ grep "some string" *
 # recursive
 grep --recursive "some string" .
 grep -r "some string" ./
+# ignore a directory 
+grep -r "some string" --exclude-dir vendor . 
 # search for a string & show lines before & after the context
 # of your search. The possible flags are: --before-context,
 # --after-context & --context
@@ -668,10 +670,13 @@ noting here
 ```bash
 # sign your commit
 git commit -s
+# update the last commit message
+git commit --amend
 # simple git log
 git log --oneline --decorate  
 # fixup a commit by id
-git commit --fixup <id-from-some-commit-in-history:
+# get the id from the command above
+git commit --fixup <id-from-some-commit-in-history> 
 git commit --fixup 4b3fg9
 # auto squash if using the above --fixup flag
 git rebase -i --autosquash <branch-to-rebase-on>
@@ -951,6 +956,8 @@ The `openssl` tool is a full suite of tools for cryptography as well as TLS and 
 
 It is not the most approachable tool, but it is really powerful.
 
+Unlike browsers, which are very trusting by default, OpenSSL trusts nothing by default. 
+
 For some background info on file names, formats, etc, [read this stackoverflow](https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file).
 
 For a longer introduction, see [A Six Part OpenSSL Tutorial](https://www.keycdn.com/blog/openssl-tutorial)
@@ -975,13 +982,37 @@ A few items of interest:
 # openssl version
 openssl version
 openssl version -a
-# list all command options
-openssl list
 # list standard commands
 openssl list-standard-commands
 # list cyphers only
-openssl list -cipher-commands
+openssl list-cipher-commands
+# other commands to list
+openssl list-message-digest-commands
+openssl list-cipher-algorithms
+openssl list-public-key-algorithms
 ```
+
+#### Client Tools 
+
+```bash 
+# connect to a server with hostname & port
+openssl s_client -connect <domain>:<port>
+openssl s_client -connect example.com:443
+# view the certificate of a web server
+# these commands will show the certificate block as well as 
+# other information, such as the serial number, issuer, validity,
+# modulus (65537 typically), and other details
+openssl s_client -showcerts -connect tld.com:443 </dev/null
+# view the certificate of a web server using SNI
+openssl s_client -showcerts -servername tld.com -connect full.path.to.resource.tld.com:443 </dev/null
+# view full details of a web server certificate
+echo | \
+    openssl s_client -servername tld.com -connect full.path.to.resource.tld.com:443 2>/dev/null | \
+    openssl x509 -text
+# view only the certificate block
+echo | openssl s_client -connect full.path.to.resource.tld.com:443 2>/dev/null | openssl x509
+```
+
 
 #### Ciphers
 
@@ -1000,14 +1031,6 @@ openssl s_client \
 #   example: require ephemeral ECDH agreement, RSA for authentication, and only "high" encryption:
 #   from https://security.stackexchange.com/questions/93143/how-to-pass-cipher-list-to-openssl-s-client
 openssl s_client -cipher ECDH+aRSA+HIGH -connect example.com:443
-```
-
-#### Client Tools 
-
-```bash 
-# connect to a server with hostname & port
-openssl s_client -connect <domain>:<port>
-openssl s_client -connect example.com:443
 ```
 
 #### Cryptography
@@ -1121,17 +1144,19 @@ openssl rsa -in private.pem -des3 -out private.encrypt.pem
 ```
 
 
-
 ### passwd
 
 Change the password of a user acct. Sys admins can use passwd to change other user's passwords. The
 command can also be used to define how an account's password can be changed, and can be used to expire
 a user's acct.
 
+More infomration [here](https://www.computerhope.com/unix/upasswor.htm), including how to reset root password.
+
 Commands altering an acct may require root/sudo.
 
 ```bash
-passwd                  # chance current user acct password
+passwd                  # chance current user acct password, will be prompted for current, new, new retyped
+sudo passwd <user>      # change another user's password, IF you have superuser privileges 
 passwd -S some_acct     # see the status of this user acct
 passwd -d some_acct     # delete the acct
 passwd -e some_acct     # expire the acct
@@ -1507,6 +1532,15 @@ kill -9 $(ps -aux | grep -v "grep" | grep grunt | awk '{print $2}')
 # grep grunt will return the line with the grunt process id
 # awk '{print $2}' returns the number in the second column, which is the pid
 ```
+
+format a json file locally by invoking python:
+
+```bash
+# read file into variable, format data, write data back to the file
+# there are many ways to accomplish this type of action
+data=$(<$HOME/.secrets/some-secret-text.txt); echo $data | python -m json.tool > $HOME/.secrets/some-secret-text.txt
+```
+
 
 ## Notes
 
