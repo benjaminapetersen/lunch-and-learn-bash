@@ -1,4 +1,4 @@
-# A Bash Tutorial
+# A Bash Reference Sheet
 
 Resources used to prep these tasks:
 
@@ -12,7 +12,7 @@ Resources used to prep these tasks:
 MacOS (what I work on) features the BSD version of many of these tools.
 This is, in my opinion, unfortunate, as BSD is not as user friendly (unconcerned
 with issues of usability).  GNU versions of these tools tend to have more
-long flags, which are easier to remember & script with.  
+long flags, which are easier to remember & script with.
 
 To get the GNU version of a tool on MacOS, you can install it via homebrew:
 
@@ -48,7 +48,7 @@ PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
 
 ## Editing the command line
 
-Bash has some command line editing features that can save time.  
+Bash has some command line editing features that can save time.
 
 - Ctrl + a  # jump to the beginning of the line
 - Ctrl + e  # jump to the end of the line
@@ -89,6 +89,9 @@ be able to integrate the following:
 ~ username    # home dir of a user
 ~+            # current working directory
 ~-            # previous working dir
+[characters]  # match any characters in the set 'characters
+[!characters] # match any characters no in the set 'characters'
+[[:class:]]   # match any characters of the specified class
 [abc...]      # Any one character in the enclosed set/class.
 [!abc...]     # Any one character not in the enclosed set/class.
 [^abc...]     # Any one character not in the enclosed set/class.
@@ -113,13 +116,21 @@ touch foo bar baz alfa bravo charlie delta echo able baker candle dog elephant
 # now try globbing
 ls a*             # should match alfa, able
 ls *a*            # match anything with an a start, middle or end of word
-ls [ac]*          # match anything with an a or a c  
+ls [ac]*          # match anything with an a or a c
 ls [!a]*          # match files not starting with a
 ls ????           # match anything with 4 characters
 ls ?????          # match anything with 5 characters
 ls ???*           # match files with at least 3 characters
 ls *[[:digit:]]*  # match files that contain a number
 ls [[:upper:]]*   # match files starting with an uppercase character
+ls hi*.txt        # any file beginning with hi and ending with .txt
+ls Data???        # any file beginning with Data and followed by exactly 3 chars
+ls [abc]*         # any file beginning with a, ab, or ac
+ls BACKUP[0-9][0-9][0-9] # any file starting with BACKUP follwed by exactly 3 numerals
+ls [[:upper:]]*   # any file starting with an uppercase letter
+ls [![:digit:]]*  # any file not beginning with a numeral
+ls *[[:lower:]123]  # any file ending with a lowercase letter, or the numerals 123
+# etc.
 ```
 
 ## Brace Expansion
@@ -150,33 +161,33 @@ echo The time is $(date +%M) minutes past $(date +%l%p)
 
 Some useful tools and tricks around parameter substitution.  For [more](http://www.tldp.org/LDP/abs/html/parameter-substitution.html)
 
-```bash 
+```bash
 # best practice, always quote strings and use this form:
 echo "name is ${first_name} ${middle_name} ${last_name}"
 echo "Old \$PATH = $PATH"
 ```
 
-```bash 
-# use defaulting 
+```bash
+# use defaulting
 PRIMARY=1
 BACKUP=2
 echo "The value is ${PRIMARY-$BACKUP}"
-# defaulting, if a var is declared but null 
+# defaulting, if a var is declared but null
 SECONDARY=
 BACKUPAGAIN=2
 echo "The value is ${SECONDARY:-$BACKUPAGAIN}"
 ```
 
-```bash 
+```bash
 # use defaulting to provide "missing" args to command line scripts
 DEFAULT_FILENAME=foobar.txt
 filename=${1:-$DEFAULT_FILENAME}
 echo "The filename is ${filename}"
 ```
 
-```bash 
-# can use defaulting inline, but do note, this reads in a misleading way 
-echo ${var=abc} # abc 
+```bash
+# can use defaulting inline, but do note, this reads in a misleading way
+echo ${var=abc} # abc
 echo ${var=zyx} # still abc!  this is defaulting, despite the =
 ```
 
@@ -190,14 +201,14 @@ qux=${baz+xyz}
 echo "qux = ${qux}" # xyz, was set to a value
 shizzle=${pop+xyz}
 echo "shizzle = ${shizzle}" # nothing, pop had no value, was not set
-# oh but watch out for that : 
+# oh but watch out for that :
 jack=
 jane=${jack:+xyz}
 echo "jane = ${jane}" # nothing. jack was set null, like above, but the : will ignore null
 ```
 
 ```bash
-# trim strings 
+# trim strings
 url="http://example.com:8443"
 # trim from the beginning of a string
 without_http=${foo#"http://"}
@@ -209,9 +220,9 @@ without_port=${foo%":8443"}
 
 ### If statements
 
-Basic if statement 
+Basic if statement
 
-```bash 
+```bash
 # -gt greater than
 if [ $1 -gt 100 ]
 then
@@ -221,7 +232,7 @@ fi
 
 Nested if statement
 
-```bash 
+```bash
 
 if [ $1 -gt 100 ]
 then
@@ -235,20 +246,20 @@ fi
 
 If else statement
 
-```bash 
+```bash
 if [ $1 -gt 100 ]
 then
   echo "arg is greater than 100"
-else 
+else
   echo "arg is smaller than 100"
 fi
 ```
 
-If elseif else statement 
+If elseif else statement
 
-```bash 
+```bash
 # -gt greater than
-# -lt less than 
+# -lt less than
 if [ $1 -gt 100 ]
 then
   echo "arg is greater than 100"
@@ -271,7 +282,7 @@ then
 fi
 ```
 
-```bash 
+```bash
 if [ $USER == 'john' ] || [ $USER == 'jane' ]
 then
   echo "known user"
@@ -280,10 +291,10 @@ else
 fi
 ```
 
-### Case statement 
+### Case statement
 
-```bash 
-# end of statement with ;; 
+```bash
+# end of statement with ;;
 # * represents any number of any char, as the last case
 case $1 in
   start)
@@ -301,6 +312,52 @@ case $1 in
 esac
 ```
 
+## Permissions
+
+Unix-like systems are multi-tasking, and multi-user. See [Permissions](https://linuxcommand.org/lc3_lts0090.php)
+
+Permissions are important, as well as understanding `chmod`, `su`, `sudo`, `chown`,`chgrp` commands.
+
+Files are directories are assigned access rights for `owner`, `group`, and `world` (everyone else). Rights granted via permissions are `read`, `write`, and `execute`.
+
+```bash
+# example permissions settings:
+# with spaces for readability:
+#  - rwx r-x r-x
+# first character - indicates file. if directory it would be "d"
+# 3 sets of 3:
+#   rwx = owner can read, write, execute
+#   r-x = group can read, execute
+#   r-x = world can read, execute
+-rwxr-xr-x
+```
+
+```bash
+# permissions viewed as a series of bits (like the machine would interpret)
+rwx rwx rwx = 111 111 111
+rw- rw- rw- = 110 110 110
+rwx --- --- = 111 000 000
+# bits, in binary, are as follows:
+rwx = 111 in binary = 7
+rw- = 110 in binary = 6
+r-x = 101 in binary = 5
+r-- = 100 in binary = 4
+```
+
+Common sets of file permissions:
+
+- `777`	(`rwxrwxrwx`) No restrictions on permissions. Anybody may do anything. Generally not a desirable setting.
+- `755`	(`rwxr-xr-x`) The file's owner may read, write, and execute the file. All others may read and execute the file. This setting is common for programs that are used by all users.
+- `700`	(`rwx------`) The file's owner may read, write, and execute the file. Nobody else has any rights. This setting is useful for programs that only the owner may use and must be kept private from others.
+- `666`	(`rw-rw-rw-`) All users may read and write the file.
+- `644`	(`rw-r--r--`) The owner may read and write a file, while all others may only read the file. A common setting for data files that everybody may read, but only the owner may change.
+- `600`	(`rw-------`) The owner may read and write a file. All others have no rights. A common setting for data files that the owner wants to keep private.
+
+Common sets of directory permissions:
+
+- `777`	(`rwxrwxrwx`) No restrictions on permissions. Anybody may list files, create new files in the directory and delete files in the directory. Generally not a good setting.
+- `755`	(`rwxr-xr-x`) The directory owner has full access. All others may list the directory, but cannot create files nor delete them. This setting is common for directories that you wish to share with other users.
+- `700`	(`rwx------`) The directory owner has full access. Nobody else has any rights. This setting is useful for directories that only the owner may use and must be kept private from others.
 
 ## Some basic bash commands
 
@@ -333,14 +390,74 @@ like most of bash, its not... elegant).
 # will come back to this in the future.
 ```
 
+### base64
+
+By default `base64` will encode a string.  You pass `--decode` for it to decode a string.  To
+use `stdin`/`stdout` you want to `echo` values and `|` pipe them to `base64`.
+
+```bash
+# base64 encode data
+echo "Hello World!" | base64  # SGVsbG8gV29ybGQK
+# base64 decode data
+echo "SGVsbG8gV29ybGQK" | base64 --decode # Hello World!
+```
+
+### cal
+
+`cal` just prints a nifty little cal, highlighting today's date.
+
+```bash
+cal
+#      July 2021
+# Su Mo Tu We Th Fr Sa
+#              1  2  3
+#  4  5  6  7  8  9 10
+# 11 12 13 14 15 16 17
+# 18 19 20 21 22 23 24
+# 25 26 27 28 29 30 31
+```
 
 ### cat
 
 `cat` concatenates files and prints them on `stdout`.
+[Some basic cat commands](https://www.tecmint.com/13-basic-cat-command-examples-in-linux/)
+
+With a small input, `cat` will often function as a basic file reader.  This is handy,
+but its intended use is actually as a string manipulation program.  `cat` is intended
+to take multiple inputs and stick them end to end (concatonate).  That said, with
+just a single argument, cat will print to stdout, which makes it a handy simple file
+reader also. For a more robust solution, see `less`.
 
 ```bash
-
-
+# display contents of a file
+cat /etc/passwd
+# see line numbers
+cat -n ./file
+# display contents of several files
+cat ./file ./file2
+# also display multiple files
+cat ./file; cat ./file2; cat ./file3
+# create a file from stdin. when done typing, press ctrl+D
+cat >file3
+# too much text? pass to more or less
+cat ./song.txt | more
+cat ./song.txt | less
+# display $ at end of lines and file
+cat -e ./song.txt
+# display tab separated lines
+cat -T ./song.txt
+# copy contents of one file into another file
+# this will overwrite the contents of destination!
+cat ./source.txt ./destination.txt
+# read several files and write to a third file
+cat ./source1.txt ./source2.txt ./source3.txt > ./destination.txt
+# sort several files into a single file!
+cat ./source1.txt ./source2.txt ./source3.txt | sort > ./destination.txt
+# append to destination file the contents of source
+cat ./source.txt >> ./destination.txt
+# redirect with standard input. < will take file contents as input for command
+# for cat, this seems basically the same as normal usage?
+cat < ./file
 ```
 
 ### cd
@@ -361,6 +478,25 @@ cd
 cd /bin
 # move to the binaries location from root
 cd bin
+```
+
+### chown
+
+Change file ownership
+
+```bash
+# change file ownership from "me" to "you"
+# changing file ownership may require super user priviledges (sudo)
+sudo chown you some_file
+```
+
+### chgrp
+
+Change group ownership
+
+```bash
+# previous group is replaced by new group ownership
+chgrp new_group some_file
 ```
 
 ### cp
@@ -389,10 +525,10 @@ Some further details [here](https://curl.haxx.se/docs/httpscripting.html).
 # make a GET request for a URL
 curl http://example.com
 # make a GET request and be explicit about response details
-# significant more information returned about the request 
-curl http://example.com --verbose 
+# significant more information returned about the request
+curl http://example.com --verbose
 # far more intersting when done with https to watch the TLS handshake
-curl https://example.com --verbose 
+curl https://example.com --verbose
 # don't check the certs. helpful for self signed certs in dev environments
 curl https://example.com --insecure
 # how long it takes?
@@ -401,38 +537,38 @@ curl http://example.com --trace-time
 curl http://example.com -o foobar.txt
 # override DNS or /etc/hosts by providing a different IP address for a named host
 curl --resolve www.example.com:80:127.0.0.1 http://www.example.com
-# specify a proxy, such as for an alternative port 
+# specify a proxy, such as for an alternative port
 curl --proxy http://example.com:1234 http://example.com
 # Basic auth. provide user / pass to HTTP authentication. no longer common, most websites use cookies
-curl http://user:pass@example.com 
-curl -u user:pass http://example.com 
+curl http://user:pass@example.com
+curl -u user:pass http://example.com
 # basic auth for a proxy user to make request through proxy
-curl --proxy-user proxuser:proxpass http://example.com 
-# headers only 
-curl --head http://example.com 
+curl --proxy-user proxuser:proxpass http://example.com
+# headers only
+curl --head http://example.com
 # several urls
-curl http://example.com http://other-example.com 
+curl http://example.com http://other-example.com
 # series of several urls with different methods such as HEAD,GET and POST,GET
-curl -head http://example.com --next http://example.com 
+curl -head http://example.com --next http://example.com
 curl --data age=37 http://example.com/how-old --next http://example.com/your-profile
 # GET form post
 curl "http://example/.com/profile?age=37&name=bob&submit=go"
-# POST form post, note that curl will not properly encode the data for you! 
-curl --data "age=37&name=bob&submit=go" http://example.com/profile 
+# POST form post, note that curl will not properly encode the data for you!
+curl --data "age=37&name=bob&submit=go" http://example.com/profile
 # follow lcoation redirect header
-curl --location http://example.com 
+curl --location http://example.com
 # add a cookie
 curl --cookie "name=bob" http://www.example.com
 # dump headers (there better options)
 curl --dump-header headers_and_cookies http://www.example.com
-# a slightly more complex example to check an oauth token endpoint and write output to file 
+# a slightly more complex example to check an oauth token endpoint and write output to file
 curl https://example.com/oauth/token --insecure --verbose -o foobar_baz.txt --dump-header headers_and_cookies
-# use cookies from a file, useful to reconnect with cookies from previous connection 
-curl --cookie cookie-jar.txt http://www.example.com 
+# use cookies from a file, useful to reconnect with cookies from previous connection
+curl --cookie cookie-jar.txt http://www.example.com
 # share cookies between scripts with cookie-jar flag
-curl --cookie cookies.txt --cookie-jar newcookies.txt http://www.example.com 
+curl --cookie cookies.txt --cookie-jar newcookies.txt http://www.example.com
 # with certificate
-curl --cert cert.pem https://www.example.com 
+curl --cert cert.pem https://www.example.com
 # or with a cert store
 curl --cacert ca-bundle.pem https://www.example.com
 # truncate a header by providing empty value to manipulate a request
@@ -442,7 +578,7 @@ curl --header "Destination:http://example2.com" http://www.example.com
 # dump a trace as ascii to a file
 curl http://www.example.com --trace-ascii trace.ascii.txt
 # with a bearer token
-curl --insecure -H "Authorization: Bearer <some-token>" https://example.com 
+curl --insecure -H "Authorization: Bearer <some-token>" https://example.com
 ```
 
 ### date
@@ -457,6 +593,22 @@ date +"the year is %Y and the day is %d"  # the year is 2017 and the day is 27
 date +"%Y %B %d, %a"                      # 2017 January 01, Sun
 date +%D                                  # 11/27/17
 date +%r                                  # 10:14:06 AM
+```
+
+### df
+
+Display free disk space.
+
+```bash
+df
+# all filesystems
+df -a
+# display in power of 1024 (much more readable)
+df -h
+# display in power of 1000.
+df -H
+# total (noop on MacOS, already prints totals)
+df -t
 ```
 
 
@@ -546,6 +698,10 @@ Some helpful links on find:
 find ./ -name "some-file.txt" # note that ./ will print extra slashes, best to use . only
 find . -name "some-file.txt"
 find . "some-file.txt" # can skip the -name flag as well
+# find by extensions
+find . -name '*.go'
+# find by extensions, then filter down with grep
+find . -name '*.jpg' -o -name '*.png' -print | grep ninnyhammer
 # case insensitive
 find . -iname 'some.*'
 # wildcard search
@@ -590,10 +746,20 @@ find . -type f -name '*.txt' -exec sed --in-place 'backup-suffix.or.no.backup' '
 find . -type f -name '*.txt' -exec sed -i '' 's/foo-bar/baz-shizzle/g' {} \;
 ```
 
+### free
+
+Get a report of system memory usage
+
+- total: all the memories!
+- used: `used = total - free - buffers - cache`
+- free: unused memory
+- shared: ignore, no meaning. backwards compat column
+- buff/cache: combined kernel buggers, page caches, slabs. can be reclaimed anytime.
+- available: new memory available for new apps w/o using swap
 
 ### grep
 
-`grep` stands for `g/re/p`, globally search a regular expression and print.  
+`grep` stands for `g/re/p`, globally search a regular expression and print.
 It is important to note that it is line based,
 so adjust your expectations (example: it won't match an expression
 multiple times in one line unless you explicitly ask).
@@ -606,13 +772,13 @@ For more, [practical grep examples](http://www.thegeekstuff.com/2009/03/15-pract
 ```bash
 # search for a string in a single file
 grep "some string" file.txt
-# search for a string in all files in the current directory  
+# search for a string in all files in the current directory
 grep "some string" *
 # recursive
 grep --recursive "some string" .
 grep -r "some string" ./
-# ignore a directory 
-grep -r "some string" --exclude-dir vendor . 
+# ignore a directory
+grep -r "some string" --exclude-dir vendor .
 # search for a string & show lines before & after the context
 # of your search. The possible flags are: --before-context,
 # --after-context & --context
@@ -673,10 +839,10 @@ git commit -s
 # update the last commit message
 git commit --amend
 # simple git log
-git log --oneline --decorate  
+git log --oneline --decorate
 # fixup a commit by id
 # get the id from the command above
-git commit --fixup <id-from-some-commit-in-history> 
+git commit --fixup <id-from-some-commit-in-history>
 git commit --fixup 4b3fg9
 # auto squash if using the above --fixup flag
 git rebase -i --autosquash <branch-to-rebase-on>
@@ -697,7 +863,7 @@ head -n 45 /usr/bin/passwd
 head -n -5 /usr/bin/passwd
 # pass output of a command to head
 ls -la | head -n 5
-# limit number of lines returned from another command 
+# limit number of lines returned from another command
 # note that if this command prints headers, the header line will count as the first returned line!
 kubectl get pods | head -n 2
 ```
@@ -743,6 +909,42 @@ Ctrl+r # type search term, then repeat Ctrl+r until match
 Esc+.
 ```
 
+### hostname
+
+```bash
+hostname
+```
+
+### id
+
+Find user names, group names, UIDs, group IDs for the current user (in this server context).
+
+```bash
+id
+# uid=501(ben) gid=20(staff) groups=20(staff),501(awagent),502(awagent_enrolled),12(everyone),61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),98(_lpadmin),701(com.apple.sharepoint.group.1),33(_appstore),100(_lpoperator),204(_developer),250(_analyticsusers),395(com.apple.access_ftp),398(com.apple.access_screensharing),399(com.apple.access_ssh),400(com.apple.access_remote_ae)
+# print only the effective user id
+id -u # 501
+# display the name of user/group ID, for the -G, -g and -u flags. falls bavk to numbers if no name string
+id -n # modifier
+# print only the effective group id
+id -g # 20
+id -gn
+# print all group IDs
+id -G
+id -Gn
+# display ID as a password file entry
+id -P
+# full name
+id -F
+# process audit
+id -A
+# auid=501
+# mask.success=0xffffffff
+# mask.failure=0xffffffff
+# termid.port=0x03000002
+# asid=100007
+```
+
 ### jq
 
 This is not built-in.  Install:
@@ -766,10 +968,48 @@ curl 'https://foo.com/api/stuff?limit=5' | jq '.[0]'
 # get first, but only certain fields
 # | is used within the jq query string to pipe one query to the next
 jq '.[0] | {message: .commit.message, name: .commit.committer.name}'
+#  view a json string as pretty-printed json output
+echo '{"foo":0}' | jq
+echo '{"foo":0}' | jq .
+# larger json string, pretty printed but still not queried
+echo '{"people": [{"name": "jane"},{"name": "jill"},{"name":"jack"}] }' | jq '.'
+# grab "people", a top level value
+echo '{"people": [{"name": "jane"},{"name": "jill"},{"name":"jack"}] }' | jq '.people'
+# grab the first item from people
+echo '{"people": [{"name": "jane"},{"name": "jill"},{"name":"jack"}] }' | jq '.people[0]'
+# grab the "name" property from the first item in people
+echo '{"people": [{"name": "jane"},{"name": "jill"},{"name":"jack"}] }' | jq '.people[0].name'
+# optional, there are no fish, jq won't error
+echo '{"people":[], "animals": []}' | jq '.fish?'
+# slice of an array
+echo '{"people": [{"name": "jane"},{"name": "jill"},{"name":"jack"}] }' | jq '.people[1:2]'
+# read from a file, print to the screen
+jq -r </tmp/some-file.json
+# read from a file, query for a value
+jq -f </tmp/some-file.json '.path.to.value' # returns raw string, some-value-without-quotes
+jq '.path.to.value' -f </tmp/some-file.json # returns json formatted string, "some-value-with-quotes"
+
 ```
 
-
 ### less
+
+`less` is a class of programs called a `pager`.
+It is an improvement on `more`. A play on words, "less is more".
+View the contents of a file.  Some commands when within the file:
+- b: back one page
+- space: foreward a page
+- up: up one line
+- down: down one line
+- G: end of the file
+- g: beginning of the file
+- h: show help
+- q: quit
+- /<search>: search for a string of characters
+  - n: within a search, go to next occurance
+
+```bash
+less some-file.txt
+```
 
 
 ### ln
@@ -789,6 +1029,10 @@ current working directory
 ```bash
 # list files
 ls
+# specify a directory
+ls ~/bin
+# specify a single file
+ls ~/bin/mysleep
 # list files in home dir
 ls ~
 ls -l ~
@@ -797,6 +1041,8 @@ ls -a
 ls -A  # but don't display . and ..
 # reverse order
 ls -r
+# change the CPU percent calculations (normally no effect, man for details)
+ls -C
 # sort alphabetically by file extension
 ls -X
 # sort based on modification time
@@ -823,8 +1069,9 @@ ls -s -h
 #   | indicates a named pipe
 #   > indicates a door
 #   / indicates a directory
-#   list file with author
+#   classify the files. will print trailing / for directories
 ls -F
+ls --classify
 # list file with author
 ls --author
 # print C-style escape characters for non-printables
@@ -842,10 +1089,28 @@ ls --hide=*.txt
 ls -l Pictures Movies Videos
 ```
 
+### lsns
+
+List Linux `namespaces`.  Namespaces control what a process can see.  Along
+with `cgroups`, `namespaces` are a critical component of what makes containers.
+
+```bash
+lsns
+#         NS TYPE   NPROCS   PID USER    COMMAND
+# 4026531834 time        3  4406 vagrant /lib/systemd/systemd --user
+# 4026531835 cgroup      3  4406 vagrant /lib/systemd/systemd --user
+# 4026531836 pid         3  4406 vagrant /lib/systemd/systemd --user
+# 4026531837 user        3  4406 vagrant /lib/systemd/systemd --user
+# 4026531838 uts         3  4406 vagrant /lib/systemd/systemd --user
+# 4026531839 ipc         3  4406 vagrant /lib/systemd/systemd --user
+# 4026531840 mnt         3  4406 vagrant /lib/systemd/systemd --user
+# 4026531992 net         3  4406 vagrant /lib/systemd/systemd --user
+```
+
 ### lsof
 
 `lsof` stands for "List Open Files".  Think of it as `ls` (list) + `of` (open files).  In
-UNIX, everything is a file (pipes, sockets, directories, devices, etc) [quoted here](http://www.thegeekstuff.com/2012/08/lsof-command-examples).  
+UNIX, everything is a file (pipes, sockets, directories, devices, etc) [quoted here](http://www.thegeekstuff.com/2012/08/lsof-command-examples).
 
 ```bash
 # open files belonging to active processes
@@ -916,7 +1181,7 @@ mkdir ./dir
 # create parent directories if they do not exist
 # beware of spelling mistakes! there will be no error
 # output for accidentally created directories
-mkdir -p foo/bar/baz/dir  
+mkdir -p foo/bar/baz/dir
 ```
 
 ### more
@@ -941,6 +1206,8 @@ Netstat (network statistics) lists network connections for TCP (transmission con
 
 This program is considered mostly obsolete.  It is superseded by `ss` and other tools.
 
+[How to use netstat](https://www.howtogeek.com/513003/how-to-use-netstat-on-linux/)
+
 ```bash
 # list all
 netstat --listen # gnu only
@@ -956,7 +1223,7 @@ The `openssl` tool is a full suite of tools for cryptography as well as TLS and 
 
 It is not the most approachable tool, but it is really powerful.
 
-Unlike browsers, which are very trusting by default, OpenSSL trusts nothing by default. 
+Unlike browsers, which are very trusting by default, OpenSSL trusts nothing by default.
 
 For some background info on file names, formats, etc, [read this stackoverflow](https://serverfault.com/questions/9708/what-is-a-pem-file-and-how-does-it-differ-from-other-openssl-generated-key-file).
 
@@ -976,9 +1243,9 @@ A few items of interest:
 - `ssl` Secure Socket Layer
 - `tls` Transport Layer Security
 
-#### Basic Commands
+#### openssl: Basic Commands
 
-```bash 
+```bash
 # openssl version
 openssl version
 openssl version -a
@@ -992,14 +1259,14 @@ openssl list-cipher-algorithms
 openssl list-public-key-algorithms
 ```
 
-#### Client Tools 
+#### openssl: Client Tools
 
-```bash 
+```bash
 # connect to a server with hostname & port
 openssl s_client -connect <domain>:<port>
 openssl s_client -connect example.com:443
 # view the certificate of a web server
-# these commands will show the certificate block as well as 
+# these commands will show the certificate block as well as
 # other information, such as the serial number, issuer, validity,
 # modulus (65537 typically), and other details
 openssl s_client -showcerts -connect tld.com:443 </dev/null
@@ -1014,7 +1281,7 @@ echo | openssl s_client -connect full.path.to.resource.tld.com:443 2>/dev/null |
 ```
 
 
-#### Ciphers
+#### openssl: Ciphers
 
 See the [ciphers manual page](https://www.openssl.org/docs/manmaster/man1/ciphers.html).
 
@@ -1033,24 +1300,24 @@ openssl s_client \
 openssl s_client -cipher ECDH+aRSA+HIGH -connect example.com:443
 ```
 
-#### Cryptography
+#### openssl: Cryptography
 
-```bash 
+```bash
 # generate a public and private key
-# the public key is 
+# the public key is
 openssl genrsa -out key.pem 1024
 # view the key
-cat key.pem 
+cat key.pem
 # view all the details in human friendly format
 # this includes exponents, modulus, primes, etc
-openssl rsa -in key.pem -text 
+openssl rsa -in key.pem -text
 # view the details, but prevent key itself from being displayed in base64 format
 # only hexadecimals will be displayed
 # public exponent will still be displayed.  it is always 65537 for 1024 keys.
 openssl rsa -in key.pem -text -noout
 # encrypt the private key
 openssl rsa -in key.pem -des3 -out enc-key.pem
-# extract public key 
+# extract public key
 openssl rsa -in key.pem -pubout -out pub-key.pem
 # encrypt a file using keys
 # note that since using RSA, file must be less than 116 bytes.
@@ -1060,7 +1327,7 @@ openssl pkeyutl -decrypt -in output.bin -inkey key.pem -out output.decrypt.bin
 
 echo "sign me" > sign-me.txt && \
   openssl dgst -sha256 < sign-me.txt > signme.hash
-# then sign the hash 
+# then sign the hash
 # creates a file something like:
 #    <padding><metadata><hash of input>
 openssl dgst -sha256 -sign key.pem -out signme.hash.signature signme.hash
@@ -1094,29 +1361,29 @@ openssl req -new \
 openssl req -text -in yourdomain.csr -noout -verify
 ```
 
-#### Symmetric Encryption 
+#### openssl: Symmetric Encryption
 
 Note that you should obviously not keep the plain text of the secret message on disk next to the encrypted.
 
-```bash 
+```bash
 # encrypt a message and write it to a file
-echo "secret number 12345" > plain.txt && \ 
-  openssl enc -aes-256-cbc -base64 -in plain.txt > secret.bin 
+echo "secret number 12345" > plain.txt && \
+  openssl enc -aes-256-cbc -base64 -in plain.txt > secret.bin
 # decrypt the message and write to a file
 openssl enc -aes-256-cbc -d -base64 -in secret.bin > secret.decrypt.txt
 ```
 
-#### Asymmetric Encryption with public.key and private.pem
-Typically, asymmetric encryption and decryption would be done with 2 parties, exchanging their public.keys.  This allows 
-each party to use the public.key of the other party to encrypt, send the data, and let the other party decrypt the data 
+#### openssl: Asymmetric Encryption with public.key and private.pem
+Typically, asymmetric encryption and decryption would be done with 2 parties, exchanging their public.keys.  This allows
+each party to use the public.key of the other party to encrypt, send the data, and let the other party decrypt the data
 with the associated private.pem.
 
-```bash 
+```bash
 # generate a private key
 openssl genrsa -out private.pem 2048
 # view a private key
 # includes both primes, coefficient, modulus, etc
-# this is very insightful 
+# this is very insightful
 openssl  rsa -in private.pem -text
 # generate a public key using a private pem
 openssl rsa  -in private.pem -pubout -out public.key
@@ -1126,7 +1393,7 @@ echo "secret number 12345" > plain.txt && \
 # decrypt file using openssl + private.pem
  openssl rsautl -decrypt -in secret.bin  -out secret.decrypt.txt -inkey private.pem
 ```
-Sign and verify 
+Sign and verify
 
 ```bash
 # use the private key to sign a message
@@ -1156,7 +1423,7 @@ Commands altering an acct may require root/sudo.
 
 ```bash
 passwd                  # chance current user acct password, will be prompted for current, new, new retyped
-sudo passwd <user>      # change another user's password, IF you have superuser privileges 
+sudo passwd <user>      # change another user's password, IF you have superuser privileges
 passwd -S some_acct     # see the status of this user acct
 passwd -d some_acct     # delete the acct
 passwd -e some_acct     # expire the acct
@@ -1166,6 +1433,49 @@ passwd -n 90 some_acct  # require update in 90 days
 passwd -i 10 some_acct  # makes an acct inactive if it exceeds password update requirement by x days
 passwd -w 12 some_acct  # set warning days before password will expire for acct
 ```
+
+### ping
+
+Provides a way to troubleshoot test or debug network connectivity issues.
+Pair with `traceroute` for further insights
+
+```bash
+ping google.com
+# PING google.com (216.58.194.174): 56 data bytes
+# 64 bytes from 216.58.194.174: icmp_seq=0 ttl=113 time=79.028 ms
+# 64 bytes from 216.58.194.174: icmp_seq=1 ttl=113 time=79.358 ms
+```
+
+
+### ps
+
+Provide information about current running processes, including PIDs. A process, or task, is a currently running or executing instance of a program.  Every running program (process) is given a PID.
+
+```bash
+# display info about your processes, and those of other users.
+# skips processes without a controlling terminal, unless -x
+ps -a
+# display info about other users processes
+ps -A
+# display environment (variables) as well
+# does not reflect change in environment after process
+ps -E
+# display uid, pid, parent pid, time, cmd
+ps -f
+# display info associated with  user, pid, ppid, pgid, sess,
+# jobc, state, tt, time, and command.
+ps -j
+# display info associated with many keywords, such as
+# uid, pid, ppid, flag, cpu, and more....
+ps -l
+# display info about processes that match a process ID
+ps -p <some-id>
+ps -p 92185
+# display processes belonging to a specific user ID
+ps -u 501
+#
+```
+
 
 ### pwd
 
@@ -1210,7 +1520,15 @@ rmdir /foo/bar/baz
 A command for securely copying files between hosts on a network using ssh for data transfer.
 
 ```bash
-# TODO:
+# download a file from a remote server to local machine
+scp user@host:/path/to/file/target/filename ~/path/to/local/destination/filename
+scp foo@10.168.169.154:/home/foo/my.tar ~/Desktop/my.tar
+scp kubo@10.168.169.154:/home/kubo/config-tar.tar ~/Desktop/kubo-config-tar.tar
+# upload a file to a remote server from local machine
+scp ~/path/to/local/target kubo@10.168.169.154:/path/to/remote/destination
+scp ~/Desktop/my.tar foo@10.168.169.154:/home/foo/my.tar
+# transfer file from one remote server to another
+scp user1@host1:/path/to/target user2@host2:/path/to/destination
 ```
 
 ### sed
@@ -1234,29 +1552,139 @@ The primary command for sed is substitute.  It has four parts:
 > Yay for usability.
 
 ```bash
+# read files. sed processes (then prints) line-by-line
+sed "" ./file.txt
+cat ./file.txt | sed ""
 # the substitute command s
 # change occurance of a regex into a new value
-sed s/day/night/ < day.txt > night.txt
-sed s/day/night/ day.txt > night.txt
+sed s/day/night/ < day.txt > night.txt                                      # (see file output)
+sed s/day/night/ day.txt > night.txt                                        # (see file output)
 # alternative delimiter, use any character you want:
-sed s_day_night_ day.txt > night.txt
+sed s_day_night_ day.txt > night.txt                                        # (see file output)
 # from echo (note: only changes the first occurance)
 echo "today is a day" | sed s/day/night/
 # update a string using & to represent the matched string
-sed 's/day/&NOODLES' < day.txt > noodles.txt
+sed 's/day/&NOODLES' < day.txt > noodles.txt                                # (see file output)
 # double the matched string
-sed 's/day/& &/' < day.txt > double_day.txt
+sed 's/day/& &/' < day.txt > double_day.txt                                 # (see file output)
 # match any line starting with a numerical value & double the replacement
-sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt
+sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt                           # (see file output)
 # match any number even if it doesn't start the line & double repalcement
-sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt
+sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt                  # (see file output)
 #
 # using extended regular expressions
 # BSD -E works on mac
 # GNU -r works on linux
 sed -E 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # BSD
 sed -r 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # GNU
+```
 
+`sed` has several modes.
+
+`print` mode
+
+```bash
+# pass sed the "print" mode
+# note that sed already prints, so this will print each line twice
+sed 'p' ./file.txt
+# suppress the automatic print, then instruct sed to print mode
+sed -n 'p' ./file.txt
+# only print 1st line
+sed -n '1p' ./file.txt
+# print 5 lines
+sed -n '1,5p' ./file.txt
+# print lines with offset
+sed -n '1,+4p' ./file.txt
+# print every other line
+sed -n '1~2p' ./file.txt
+```
+
+`delete` mode
+
+```bash
+# delete every other line in output
+sed '1~2d' ./file.txt
+```
+
+`--in-place` flag is important
+
+```bash
+# delete every other line, but in the file itself, not in output
+sed --in-place '1~2d' ./file.txt
+sed -i '1~2d' ./file.txt
+# create a backup file while performing instructions
+# the -i.bak causes a backup file creation
+# this does not work with --in-place
+sed -i.bak '1~2d' ./file.txt
+```
+
+`substitution` mode
+
+substitutions
+`s` is the substitution command, followed by separators:
+  `s///`
+the text to substitute is between the separators:
+sed uses 3 / for substututions:
+  `s/old_word/new_word/`
+you can swap the separators for any character that makes sense:
+here using _ instead of /
+  `s_old-word_new-word_`
+
+```bash
+echo "sed substitutions...."
+# https://www.example.com/index.html -> https://www.example.com/home.html
+echo "https://www.example.com/index.html" | sed 's_com/index_org/home_'
+```
+
+substitutions works on patterns, not words.
+
+The substitution string is as follows: `s/foo/BAR/` where:
+- `s`	  Substitute command
+- `/../../`	  Delimiter
+- `foo`	  Regular Expression Pattern Search Pattern
+- `BAR`	  Replacement string
+
+```bash
+# simple replacement, single occurance vs global (per line)
+echo "sunday monday tuesday" | sed 's/[a-z]*/(&)/'  # (sunday) monday tuesday
+echo "sunday monday tuesday" | sed 's/[a-z]*/(&)/g' # (sunday) (monday) (tuesday)
+# catch and match replacements
+echo "123 abc" | sed 's/[0-9]*/& &/'
+# echo "Sunday Monday Tuesday" | sed 's/[a-z]*/(&)/'
+# it ONLY operates on the first match (per line)...
+sed 's/on/forward/' build_song.txt          # 3 occurances of "on", but only match 1 is changed
+# use the 'g' flag to "globally" (per line) update all matches
+sed 's/on/forward/g' build_song.txt         # update all occurances (per line)
+# use a specific number to only match a specific occurance
+# in this case, only the second occurance (per line)
+sed 's/on/forward/2' build_song.txt         # update only the second occurance (per line)
+# to only see output for lines actually changed,
+# - pass the -n to suppress default printing
+# - pass 'p' within the command string to indicate print output of the command (when activated)
+sed -n 's/on/forward/2p' build_song.txt
+# ignore case by passing the 'i' flag
+sed 's/SINGING/saying/i' build_song.txt
+
+# replacing with regex
+# a semi-complex example:
+# - start at the beginning of the line only
+# - stop at the word 'at'
+# - if 'at' is found, everything up to and including 'at' will be replaced
+sed 's/^.*at/REPLACED/' song.txt
+# now do the same, but instead of replacing with word REPLACED,
+# we can use the '&' as a reference to matched text and just
+# insert it back, but surrounded by parens:
+sed 's/^.*at/(&)/' song.txt
+#
+# increasing complexity
+# using this regex:
+#    [a-zA-Z0-9][a-zA-Z0-9]*
+# we can match a word. using it twice, we can match two words
+# then we can "store" these words, and swap them
+# by later using \2 and \1 as references
+sed 's/\([a-zA-Z0-9][a-zA-Z0-9]*\) \([a-zA-Z0-9][a-zA-Z0-9]*\)/\2 \1/' song.txt # sadly not readable! wrap in a func!
+# the same thing, with a better pattern matcher:
+sed 's/\([^ ][^ ]*\) \([^ ][^ ]*\)/\2 \1/' song.txt                             # sadly not readable! wrap in a func!
 ```
 
 ### sort
@@ -1292,7 +1720,7 @@ ssh -l user foo.bar.com
 ssh user@foo.bar.com
 # execute a command on a remote machine without actually logging into the shell prompt
 ssh user@foo.bar.com ls /some/dir
-# use an identity (private key) file  
+# use an identity (private key) file
 ssh -i /path/to/id_rsa user@food.bar.com
 # debug the ssh client
 ssh -v user@foo.bar.com
@@ -1301,6 +1729,28 @@ ssh -v user@foo.bar.com
 ### ssh-keygen
 
 ### ssh-copy-id
+
+### su
+
+`su`bstitute user. Become a super user for a short while.
+Prefer `sudo` to `su`.
+
+```bash
+# enter a new shell session as super user
+su
+# ... do things
+# exit the super user session
+exit
+```
+
+### sudo
+
+`su`per `u`ser `do`.  Do a thing, as super user.
+
+```bash
+# as super user, perform some command.
+sudo some-command
+```
 
 ### tail
 
@@ -1338,6 +1788,24 @@ tar --create --gzip --file=my-archive.tar.gz some-dir/
 tar -czf my-archive.tar.gz some-dir/
 ```
 
+### tee
+
+Read the stdin, and write to both stdout and a file.  This command is named after
+the T-splitter in plumbing.
+
+```bash
+# output both:
+#    stuff and things
+#    stuff.txt will include "stuff and things"
+echo "stuff and things" | tee -a stuff.txt
+# then
+# output is 1 stuff.txt
+# stuff.txt will include
+#   "       1 stuff.txt"
+wc -l stuff.txt | tee stuff.txt
+       1 stuff.txt
+```
+
 ### touch
 
 Update a file's timestamp to the current date w/o modification
@@ -1345,6 +1813,94 @@ of the file.  If the file doesn't exist, create an empty file.
 
 ```bash
 touch foo/bar/baz.txt
+```
+
+### tty
+
+Print the name of the terminal in use.
+`tty` stands for "teletypewriter". [tty history](https://www.howtogeek.com/428174/what-is-a-tty-on-linux-and-how-to-use-the-tty-command/)
+In the 1830s `teleprinters` were developed which could send typed
+messages `down the wire`, a phrase we still use in various forms
+today, such as `on the wire`.
+
+```bash
+tty
+# /dev/ttys005
+# silent output, but still get an exit code
+tty -s
+tty -s && echo "In a tty"
+```
+
+### traceroute
+
+Traces the path that an Internet Protocal (IP) packet takes to its destination.
+Pair with `ping` for further insights.
+
+
+```bash
+ping google.com
+# PING google.com (216.58.194.174): 56 data bytes
+# 64 bytes from 216.58.194.174: icmp_seq=0 ttl=113 time=79.028 ms
+# 64 bytes from 216.58.194.174: icmp_seq=1 ttl=113 time=79.358 ms
+traceroute google.com
+# traceroute to google.com (216.58.194.174), 64 hops max, 52 byte packets
+#  1  192.168.1.254 (192.168.1.254)  3.827 ms  3.492 ms  3.401 ms
+#  2  104-185-72-1.lightspeed.rlghnc.sbcglobal.net (104.185.72.1)  7.363 ms  5.005 ms  5.374 ms
+#  3  99.173.77.10 (99.173.77.10)  6.360 ms  5.767 ms  5.849 ms
+#  4  12.123.138.230 (12.123.138.230)  20.596 ms  24.045 ms  23.463 ms
+#  5  wswdc21crs.ip.att.net (12.122.2.190)  17.822 ms  16.400 ms  22.467 ms
+#  6  12.122.116.37 (12.122.116.37)  19.920 ms  16.105 ms  14.305 ms
+#  7  12.255.11.0 (12.255.11.0)  15.347 ms  23.851 ms  16.958 ms
+#  8  108.170.246.34 (108.170.246.34)  16.835 ms
+#     108.170.246.49 (108.170.246.49)  26.326 ms
+#     108.170.240.98 (108.170.240.98)  21.672 ms
+#  9  142.251.49.192 (142.251.49.192)  18.384 ms
+#     108.170.246.33 (108.170.246.33)  38.888 ms
+#     108.170.240.97 (108.170.240.97)  18.009 ms
+# 10  108.170.246.49 (108.170.246.49)  22.898 ms
+#     108.170.246.2 (108.170.246.2)  29.321 ms
+#     108.170.246.66 (108.170.246.66)  18.831 ms
+# 11  142.251.49.192 (142.251.49.192)  16.737 ms  15.666 ms
+#     142.251.49.73 (142.251.49.73)  19.766 ms
+# 12  142.251.49.207 (142.251.49.207)  34.921 ms
+#     142.251.224.217 (142.251.224.217)  89.442 ms
+#     72.14.239.235 (72.14.239.235)  79.519 ms
+# 13  66.249.94.28 (66.249.94.28)  82.269 ms
+#     216.239.58.214 (216.239.58.214)  79.246 ms
+#     66.249.94.28 (66.249.94.28)  85.107 ms
+# 14  108.170.242.241 (108.170.242.241)  78.898 ms  80.873 ms
+#     72.14.239.235 (72.14.239.235)  85.094 ms
+# 15  66.249.94.28 (66.249.94.28)  82.557 ms
+#     142.250.234.54 (142.250.234.54)  84.088 ms  78.819 ms
+# 16  108.170.242.81 (108.170.242.81)  80.464 ms  81.826 ms
+#     108.170.242.241 (108.170.242.241)  87.312 ms
+# 17  108.170.237.23 (108.170.237.23)  86.384 ms
+#     sfo07s13-in-f14.1e100.net (216.58.194.174)  77.604 ms  80.847 ms
+```
+
+
+### tree
+
+Print a tree diagram of a directory
+
+```bash
+tree --version
+# print all files, including hidden
+tree -a
+# follow symbolic links
+tree -l
+# print full file paths
+tree -f
+tree
+# .
+# ├── foodir
+# │   ├── bardir
+# │   │   ├── file.yaml
+# │   │   ├── file2.yaml
+# │   └── values.yaml
+# ├── bazdir
+# │   ├── file3.yaml
+# └── file4.yaml
 ```
 
 ### usermod
@@ -1453,7 +2009,64 @@ wc -l /etc/passwd
 # just words
 wc -w /etc/passwd
 # just characters
-wc -c /etc/passwd  
+wc -c /etc/passwd
+```
+
+### w
+
+Provide a quick summary of every user logged into the computer,
+what each user is doing, and the load of activities.
+
+```bash
+w
+# 12:10  up 2 days, 22:33, 7 users, load averages: 2.12 2.34 2.25
+# USER           TTY      FROM              LOGIN@  IDLE WHAT
+# samgamgee      console  -                Mon13   2days -
+# samgamgee      s004     -                11:17      52 -zsh
+# samgamgee      s000     -                Tue10   25:41 /usr/bin/ssh vagrant@127.0.0.1 -p 2200 -o
+# samgamgee      s001     -                Wed16   14:03 -zsh
+# samgamgee      s002     -                Wed22    3:19 -zsh
+# samgamgee      s003     -                 8:50      17 -zsh
+# samgamgee      s005     -                11:35       - w
+
+```
+
+### who
+
+Get information about current logged in users on the system.
+
+
+```bash
+who
+# samgamgee      console  Jul 26 13:37
+# samgamgee      ttys000  Jul 27 10:22
+# samgamgee      ttys001  Jul 28 16:32
+# samgamgee      ttys002  Jul 28 22:06
+# samgamgee      ttys003  Jul 29 08:50
+# samgamgee      ttys004  Jul 29 11:17
+# samgamgee      ttys005  Jul 29 11:35
+# add headings
+who -H
+# show all details of current logged in user
+who -a
+who -a -H
+# display host name and user associated with stdin (such as keyboard)
+who -m -H
+# USER           LINE     WHEN
+# sangamgee      ttys005  Jul 29 11:35
+# list users logged in
+who -u
+# list dead process details
+who -d -H
+```
+
+### whoami
+
+Display system's username
+
+```bash
+whoami
+# samgamgee
 ```
 
 ### xargs
@@ -1498,6 +2111,29 @@ ls *.files.to.move.txt | xargs -n1 -i cp {} /new/dir/for/files
 find / -name *.files.to.archive.txt -type f -print | xargs tar -cvzf some.backup.tar.gz
 # download all urls from an input file
 cat some-url-list.txt | xargs wget -c
+```
+
+### yq
+
+`yq` is a tool that takes `yaml` input and converts it to `json`
+then pipes it to `jq` (and optionally converts it back to `yaml`).
+
+- https://kislyuk.github.io/yq/
+- https://mikefarah.gitbook.io/yq/
+
+```bash
+# just print the yaml, in color
+yq e people.yaml
+# evaluate a "find" string against a file
+yq e '.people.groups[0].name' people.yaml
+# employees
+# generate a new yaml file to stdin
+yq e -n '.people.groups[0].name = "employees"'
+# people:
+#   groups:
+#     - name: cats
+# update the contents of a yaml file directly
+yq e '.people.groups[0].name = "ex-employees"' -i people.yaml
 ```
 
 
@@ -1548,15 +2184,15 @@ To use home made scripts, it is recommended to put them in `~/bin`, as this is f
 across Linux distros.  Then, just double check that it is in your `$PATH` via `echo $PATH`, and
 `export PATH=$PATH:~/bin` or add it via your `.bash_profile`.
 
-## Examples 
+## Examples
 
 TODO: need to split this out && clean up the current /snippets, etc folders.
 
 There are great examples of best practices if you look carefully.  There are tons of terrible examples as well :)
 
-A nice, short file example from [Docker docs](https://docs.docker.com/config/containers/multi-service_container/): 
+A nice, short file example from [Docker docs](https://docs.docker.com/config/containers/multi-service_container/):
 
-```bash 
+```bash
 #!/bin/bash
 
 # Start the first process
