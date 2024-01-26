@@ -390,6 +390,55 @@ like most of bash, its not... elegant).
 # will come back to this in the future.
 ```
 
+### ASDF
+
+`asdf` is a version manager for any programming language, not just a single
+language. 
+
+- https://asdf-vm.com/guide/getting-started.html
+- https://www.ookangzheng.com/asdf-to-manage-multiple-golang-on-mac/
+
+```bash
+# they really want git instead of brew :(
+# brew install asdf
+# then update ~/.zshrc
+plugins=(
+    asdf # use the plugin for asdf
+)
+# then in iTerm
+asdf plugin-add python
+asdf plugin-add golang
+# you can specify a url, but shouldn't need to
+asdf plugin-add golang https://github.com/kennyp/asdf-golang.git
+asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+
+# versions currently installed
+asdf list ruby
+asdf list nodejs
+asdf list golang
+
+# all possible verisons available
+asdf list all ruby
+asdf list all nodejs
+asdf list all golang
+
+asdf install golang 1.20
+asdf install golang 1.19
+asdf install golang 1.18
+# etc
+asdf list golang
+# set global
+asdf global golang latest
+asdf local golang 1.18.10
+
+# Warning!
+# After using go get or go install to install a package you need to run asdf reshim golang to get any new shims.
+go get <some.package> # such as golangci-lint
+go reshim golang
+```
+
+
 ### base64
 
 By default `base64` will encode a string.  You pass `--decode` for it to decode a string.  To
@@ -1215,6 +1264,96 @@ netstat -l # bsd
 # search for specific port
 netstat -l | grep '<port-number>'
 ```
+
+### nmap
+
+NMAP is a networking tool that can do quite a few things.
+TODO: put some more work into this.
+
+```bash
+# use this to check which TLS versions and which ciphers 
+# for each TLS versions are supported by a particular sever 
+nmap -sV --script ssl-enum-ciphers -p 443 www.example.com
+```
+
+An example output of `nmap` looks like this:
+
+```bash
+# this is roughly how our integration tests use nmap
+# to get a list of ciphers for a domain.
+# it is being used for supervisor or our servers, but it 
+# can be used for any public domain or IP as well.
+nmap --script ssl-enum-ciphers -p 443 www.google.com
+# Starting Nmap 7.94 ( https://nmap.org ) at 2024-01-17 17:02 EST
+# Nmap scan report for www.google.com (142.251.46.228)
+# Host is up (0.075s latency).
+# Other addresses for www.google.com (not scanned): 2607:f8b0:4005:813::2004
+# rDNS record for 142.251.46.228: sfo03s27-in-f4.1e100.net
+
+# PORT    STATE SERVICE
+# 443/tcp open  https
+# | ssl-enum-ciphers:
+# |   TLSv1.0:
+# |     ciphers:
+# |       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_RSA_WITH_AES_128_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_AES_256_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_3DES_EDE_CBC_SHA (rsa 2048) - C
+# |     compressors:
+# |       NULL
+# |     cipher preference: server
+# |     warnings:
+# |       64-bit block cipher 3DES vulnerable to SWEET32 attack
+# |   TLSv1.1:
+# |     ciphers:
+# |       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_RSA_WITH_AES_128_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_AES_256_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_3DES_EDE_CBC_SHA (rsa 2048) - C
+# |     compressors:
+# |       NULL
+# |     cipher preference: server
+# |     warnings:
+# |       64-bit block cipher 3DES vulnerable to SWEET32 attack
+# |   TLSv1.2:
+# |     ciphers:
+# |       TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256 (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384 (ecdh_x25519) - A
+# |       TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256 (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384 (ecdh_x25519) - A
+# |       TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256 (ecdh_x25519) - A
+# |       TLS_RSA_WITH_3DES_EDE_CBC_SHA (rsa 2048) - C
+# |       TLS_RSA_WITH_AES_128_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_AES_128_GCM_SHA256 (rsa 2048) - A
+# |       TLS_RSA_WITH_AES_256_CBC_SHA (rsa 2048) - A
+# |       TLS_RSA_WITH_AES_256_GCM_SHA384 (rsa 2048) - A
+# |     compressors:
+# |       NULL
+# |     cipher preference: client
+# |     warnings:
+# |       64-bit block cipher 3DES vulnerable to SWEET32 attack
+# |   TLSv1.3:
+# |     ciphers:
+# |       TLS_AKE_WITH_AES_128_GCM_SHA256 (ecdh_x25519) - A
+# |       TLS_AKE_WITH_AES_256_GCM_SHA384 (ecdh_x25519) - A
+# |       TLS_AKE_WITH_CHACHA20_POLY1305_SHA256 (ecdh_x25519) - A
+# |     cipher preference: client
+# |_  least strength: C
+
+# Nmap done: 1 IP address (1 host up) scanned in 5.28 seconds
+```
+
 
 ### openssl
 
