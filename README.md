@@ -434,7 +434,8 @@ asdf local golang 1.18.10
 
 # Warning!
 # After using go get or go install to install a package you need to run asdf reshim golang to get any new shims.
-go get <some.package> # such as golangci-lint
+go get <some.package> # such as golangci-lint, this was a "gotcha" for me.
+# unfortunate hassle, if you forget the error is not obvious. 
 go reshim golang
 ```
 
@@ -1710,6 +1711,12 @@ sed 's/day/& &/' < day.txt > double_day.txt                                 # (s
 sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt                           # (see file output)
 # match any number even if it doesn't start the line & double repalcement
 sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt                  # (see file output)
+# substitute the beginning of the line with additional spaces
+# useful for "tabbing in" a subsequent line of output
+echo "hello world" | sed "s|^|  |"
+# substituted the end of the line with additional characters. not as useful, but perhaps intersting
+echo "hello world" | sed "s|$| hi |"
+#  hello world hi
 #
 # using extended regular expressions
 # BSD -E works on mac
@@ -2250,6 +2257,24 @@ ls *.files.to.move.txt | xargs -n1 -i cp {} /new/dir/for/files
 find / -name *.files.to.archive.txt -type f -print | xargs tar -cvzf some.backup.tar.gz
 # download all urls from an input file
 cat some-url-list.txt | xargs wget -c
+# substitute precisely "n" items into a following command.  here -n is 1 item:
+echo 1 2 3 4 | xargs -n1 -I {} echo "the number: {} before the next."
+#  the number: 1 before the next.
+#  the number: 2 before the next.
+#  the number: 3 before the next.
+#  the number: 4 before the next.
+# prefix some text before and after each output:
+ls -la | xargs -I {} echo "line is: {} > hello world"
+#  line is: total 128 > hello world
+#  line is: drwxr-xr-x@ 17 user grou 544 Feb 26 16:59 . > hello world
+#  line is: -rw-r--r--@ 1 petersenbe staff 15870 Feb 26 16:59 README.md > hello world
+# pass a script to xargs in quotes to do multiline things
+# this will get a list of pods names only, pass them to xargs as an argument and 
+# one-by-one run a df command against the /some-dir to check the volume usage for each pod.
+kubectl get pods \
+  -n default \
+  --template '{{range .items}}{{.metadata.name}}{{"\n"}}{{end}}' \
+  | xargs -n1 -I {} bash -c "echo \"{}: \" && kubectl exec {} -n default -c container-name -- df -ah /some-dir | sed \"s|^|  |\"" \
 ```
 
 ### yq
