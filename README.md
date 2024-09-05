@@ -393,7 +393,7 @@ like most of bash, its not... elegant).
 ### ASDF
 
 `asdf` is a version manager for any programming language, not just a single
-language. 
+language.
 
 - https://asdf-vm.com/guide/getting-started.html
 - https://www.ookangzheng.com/asdf-to-manage-multiple-golang-on-mac/
@@ -435,7 +435,7 @@ asdf local golang 1.18.10
 # Warning!
 # After using go get or go install to install a package you need to run asdf reshim golang to get any new shims.
 go get <some.package> # such as golangci-lint, this was a "gotcha" for me.
-# unfortunate hassle, if you forget the error is not obvious. 
+# unfortunate hassle, if you forget the error is not obvious.
 go reshim golang
 ```
 
@@ -1272,8 +1272,8 @@ NMAP is a networking tool that can do quite a few things.
 TODO: put some more work into this.
 
 ```bash
-# use this to check which TLS versions and which ciphers 
-# for each TLS versions are supported by a particular sever 
+# use this to check which TLS versions and which ciphers
+# for each TLS versions are supported by a particular sever
 nmap -sV --script ssl-enum-ciphers -p 443 www.example.com
 ```
 
@@ -1282,7 +1282,7 @@ An example output of `nmap` looks like this:
 ```bash
 # this is roughly how our integration tests use nmap
 # to get a list of ciphers for a domain.
-# it is being used for supervisor or our servers, but it 
+# it is being used for supervisor or our servers, but it
 # can be used for any public domain or IP as well.
 nmap --script ssl-enum-ciphers -p 443 www.google.com
 # Starting Nmap 7.94 ( https://nmap.org ) at 2024-01-17 17:02 EST
@@ -1697,24 +1697,25 @@ sed "" ./file.txt
 cat ./file.txt | sed ""
 # the substitute command s
 # change occurance of a regex into a new value
-sed s/day/night/ < day.txt > night.txt                                      # (see file output)
-sed s/day/night/ day.txt > night.txt                                        # (see file output)
+sed s/day/night/ < day.txt > night.txt      # (see file output)
+sed s/day/night/ day.txt > night.txt        # (see file output)
 # alternative delimiter, use any character you want:
-sed s_day_night_ day.txt > night.txt                                        # (see file output)
+sed s_day_night_ day.txt > night.txt        # (see file output)
 # from echo (note: only changes the first occurance)
 echo "today is a day" | sed s/day/night/
 # update a string using & to represent the matched string
-sed 's/day/&NOODLES' < day.txt > noodles.txt                                # (see file output)
+sed 's/day/&NOODLES' < day.txt > noodles.txt   # (see file output)
 # double the matched string
-sed 's/day/& &/' < day.txt > double_day.txt                                 # (see file output)
+sed 's/day/& &/' < day.txt > double_day.txt    # (see file output)
 # match any line starting with a numerical value & double the replacement
-sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt                           # (see file output)
+sed 's/[0-9]*/& &/' < file.txt > nums_doubled.txt    # (see file output)
 # match any number even if it doesn't start the line & double repalcement
-sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt                  # (see file output)
+sed 's/[0-9][0-9]*/& &/' nums.txt > nums_doubled_again.txt   # (see file output)
 # substitute the beginning of the line with additional spaces
 # useful for "tabbing in" a subsequent line of output
 echo "hello world" | sed "s|^|  |"
-# substituted the end of the line with additional characters. not as useful, but perhaps intersting
+# substituted the end of the line with additional characters.
+# not as useful, but perhaps intersting
 echo "hello world" | sed "s|$| hi |"
 #  hello world hi
 #
@@ -1723,6 +1724,15 @@ echo "hello world" | sed "s|$| hi |"
 # GNU -r works on linux
 sed -E 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # BSD
 sed -r 's/[0-9]+/& &/' nums.txt > nums_doubled.txt # GNU
+# some more
+# given a "hickory dickory dock..." file called rhyme.txt
+# this will change all occurances of "mouse" to "cat"
+# and print the lines to the screen, but will not update
+# the file in place
+sed 's/mouse/cat/' rhyme.txt
+# this will do the same change, but will update the file in place
+sed -i 's/mouse/cat/' rhyme.txt
+
 ```
 
 `sed` has several modes.
@@ -1897,6 +1907,11 @@ exit
 # as super user, perform some command.
 sudo some-command
 ```
+
+### systemctl
+
+A component of `systemd`, `systemctl` is a command toold for managing and monitoring
+of the systemd system and service manager.
 
 ### tail
 
@@ -2269,7 +2284,7 @@ ls -la | xargs -I {} echo "line is: {} > hello world"
 #  line is: drwxr-xr-x@ 17 user grou 544 Feb 26 16:59 . > hello world
 #  line is: -rw-r--r--@ 1 petersenbe staff 15870 Feb 26 16:59 README.md > hello world
 # pass a script to xargs in quotes to do multiline things
-# this will get a list of pods names only, pass them to xargs as an argument and 
+# this will get a list of pods names only, pass them to xargs as an argument and
 # one-by-one run a df command against the /some-dir to check the volume usage for each pod.
 kubectl get pods \
   -n default \
