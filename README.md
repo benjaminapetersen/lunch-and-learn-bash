@@ -1913,6 +1913,29 @@ sudo some-command
 A component of `systemd`, `systemctl` is a command toold for managing and monitoring
 of the systemd system and service manager.
 
+### syncthing
+
+https://syncthing.net/
+https://formulae.brew.sh/formula/syncthing
+
+Syncthing is a continuous file synchronization program. It synchronizes files
+between two or more computers in real time, safely protected from prying eyes.
+Your data is your data alone and you deserve to choose where it is stored,
+whether it is shared with some third party, and how it’s transmitted over
+the internet.
+
+```bash
+brew install syncthing
+# need to start the service, can do so with brew, or directly
+brew services start syncthing                                     # brew
+/opt/homebrew/opt/syncthing/bin/syncthing -no-browser -no-restart # directly
+# then open http://127.0.0.1:8384 and tell me your device ID
+# - opens browser
+#   - show ID in top right menu
+#   - settings: setup auth, need security!
+# there are CLI options also
+```
+
 ### tail
 
 Print the last N number of lines from an input (usually a file), by default 10 lines.
