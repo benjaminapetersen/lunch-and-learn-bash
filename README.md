@@ -745,6 +745,27 @@ powerful tool is in order.
 diff -w file1.txt file2.txt
 ```
 
+### envsubst
+
+`envsubst` searches the input for pattern `$VARIABLE` or `${VARIABLE}`
+and then replaces the pattern with the value of the corresponding variable.
+It is expected to be used with a template file of some type.
+
+Given the `template` file `misc/welcome.txt`, the following examples
+can be run:
+
+```bash
+export HELLO="good morning"
+envsubst < welcome.txt # Hello user jane in My_Compute. It's time to say good morning!
+# we can limit the replacement with a list of vars via the 
+# SHELL-FORMAT arg, which is just an additional string,
+# but be user to use single quotes around the variable so that 
+# variable substitution does not transform the SHELL-FORMAT first
+envsubst '$USER' < welcome.txt # now, only $USER will be replaced
+envsubst '$USER,$HELLO' < welcome.txt # multiple vars in allow list
+envsubst 'Oddly this can have other text $USER,$HELLO' < welcome.txt # behaves the same as prev
+```
+
 ### export
 
 View or create environment variables:
@@ -1702,6 +1723,40 @@ ping google.com
 # 64 bytes from 216.58.194.174: icmp_seq=1 ttl=113 time=79.358 ms
 ```
 
+## printf
+
+`printf` like C,C++, with format strings:
+
+- `%s` string
+- `%c` character
+- `%d` integer
+- `%o` octal integer
+- `%x` hexadecimal integers
+- `%f` floating point
+- `%b` string with backslash escape cahr
+- `%%` percent sign
+
+```bash
+# echo is the easiest way to print in bash
+export var=SHIZZLE; echo "Value of var is $var, and again ${var}"
+# printf acts like printf in C or C++
+printf "My brother %s is %d years old.\n" Bobby 12
+# interestingly can run many times
+# note that this isn't what you want to do, probably
+printf "File name is %s\n" $(ls misc)               # the ls here will respond with one line per file in dir
+printf "Hello %s\n" John Jane Jack Susan            # another, format string will again be applied to all args
+printf "Hi multiple? %s %s\n" John Jane Jack Susan  # here its called twice, with pairs of args
+# surprise! or not, depending on your familiarity
+printf "The octal value of %d is %o\n" 30 30 # The octal value of 30 is 36
+# only one of these does the right thing
+printf "String with backslash: %s\n" "Hello\nWorld!"
+printf "String with backslash: %b\n" "Hello\nWorld!"
+# one by one will run:
+printf "Character: %c\n" a b c d e f g h i j k l m n o p
+# adding space to the output with the field width identifier
+printf "%10s| %5d\n" Age 23   # right aligned, by default, 5 spaces
+printf "%-10s| %-5d\n" Age 23 # left aligned, with -5 spaces
+```
 
 ### ps
 
