@@ -380,14 +380,74 @@ probably the least friendly.
 `awk` command format is `awk 'pattern {action}' input-file > output-file`.
 
 The [grymoire](http://www.grymoire.com/Unix/Awk.html) is a good resource for awk as well.
+A quick [tutorial](https://www.howtogeek.com/562941/how-to-use-the-awk-command-on-linux/) here.
 
 Since many unix programs generate text in rows and columns, `awk` is an important tool
 to know to process these files.  It is, to a degree, a programming language (though, imho,
 like most of bash, its not... elegant).
 
+`awk` utilizes the following:
+
 ```bash
-# TODO: awk is complex enough you end up writing awk scripts
-# will come back to this in the future.
+# basics of an awk program
+''      # a pair of single quotes contains the program given to awk, as in "awk ''"
+{}      # a pair of curlies represents a pattern. patterns are full regex and can do A LOT
+$0      # the full line of text
+$1      # the first field in a line of text
+$2      # 2nd field...
+$19     # 19th field, etc
+$NF     # the last field in a line, regardless of lenth. NF="Number of Fields"
+# rules
+OFS         # the "output field separator", default is a space 
+BEGIN {}    # run before the program runs, has its own {} containing actions
+END {}      # run after the program ends, has its own {} containing actions
+# actions
+print       # to print something, such as $1 or "some text"
+# flags
+-F          # -F is the field separator string. Default is space, can set with -F:, -F&, etc. 
+```
+
+```bash
+# utilizing 'who' output, such as:
+who 
+# jane console      2024-10-18 10:24
+# john ttys001      2024-10-25 13:04
+# jinny ttys000      2024-10-25 13:
+who | awk '{print $1}' # prints the first field per line
+# jane
+# john
+# jinny
+who | awk '{print $1, $3}' # print first and third field
+who | awk '{print $1, "is using", $3, "right now"}' # create a sentence with fields
+who | awk '{print $NF}' # $NF is number of fields, means "the last field"
+# take a file input
+awk '{print $1,$2,$NF}' text.txt # print 1st,2nd,last field in each line of text.txt
+# reformate date output
+date
+# Sat Oct 26 16:01:27 EDT 2024
+date | awk '{print $2,$3,$6}' # drop the noisy time and timezone and just get date
+# Oct 26 2024
+date | awk '{print $2,$3, "th,",$6}' # a little clunky
+# Oct 26 th, 2024
+# can change the OFS "Output Field Separator" rule
+date | awk 'OFS="/" {print$2,$3,$6}'
+# Oct/26/2024
+# 
+# can run commands at the start and end of the awk 
+# program with the BEGIN and END rules
+awk 'BEGIN {print "THE START"} {print $0} END {print "THE END"}' text.txt
+# 
+# change the default field separator matcher from space to colon :
+# and print the user & home dir from the /etc/passwd file
+awk -F: '{print $1, $6}' /etc/passwd
+# now, print only when field $3 is greater than 1000
+awk -F: '$3 >= 1000 {print $1,$6}' /etc/passwd
+# with a title
+awk -F: 'BEGIN {print "User Accounts\n-------------"} $3 >= 1000 {print $1,$6}'
+# the /etc/fstab file contains a lot of
+#   UUID=foo <and other stuff>
+# so we can search for UUID, then print the $0 (full line)
+awk '/UUID/ {print $0}' /etc/fstab
 ```
 
 ### ASDF
@@ -451,6 +511,17 @@ echo "Hello World!" | base64  # SGVsbG8gV29ybGQK
 # base64 decode data
 echo "SGVsbG8gV29ybGQK" | base64 --decode # Hello World!
 ```
+
+### bats
+
+`bats` is `bash automated testing system`.
+
+- [bats-core docs](https://bats-core.readthedocs.io/en/stable/)
+
+```bash
+
+```
+
 
 ### cal
 
@@ -1247,6 +1318,51 @@ mv file.txt file2.txt
 mv ./dir ./dir2
 # move multiple files to a directory
 mv file.txt file2.txt file3.txt ./files
+```
+
+### nc
+
+`nc` is short for netcat.  netcat is a util in Linux for networking tasks.
+`nc` can be used to work with Unix sockets, along with `lsof`, etc.
+
+[Intro to sockets](https://www.baeldung.com/linux/communicate-with-unix-sockets)
+
+On sockets, there are several types.
+- TCP sockets will use `SOCK_STREAM` (reliable)
+- UDP sockets will use `SOCK_DGRAM`  (unreliable, by definition**)
+  - UDP is typically considered unreliable.  However, when it comes to 
+    a Unix Socket, both TCP and UDP are reliable.
+For Unix sockets, we can additionally say:
+- `SOCK_DGRAM` preserves message boundaries, is connectionless
+- `SOCK_STREAM` does not preserve message boundaries, is connection-oriented
+- `SOCK_SEQPACKET` is new since Linux 2.6.4 
+  - it preserves message boundaries and is also connection-oriented
+
+Sockets are bi-directional, both sides can send and receive.
+Unix sockets use the `permissions` of the directory they are in. Thus,
+the process needs `write` and `execute` permissions on the directory 
+to create the socket file.  This is also true for processes that desire
+to connect to the socket.
+
+Unix sockets have an advantage of not incurring the overhead of the
+TCP/IP stack.  This provides a performance win.
+
+```bash
+# create a unix socket with netcat
+# -l means listen, or, act as the server side of the connection
+# -U means "Unix socket" to define the type of socket to create
+nc -U /tmp/demo.sock -l
+# check it with lsof. Will print command, PID, user, FD(file descriptor), etc.
+#  FD is important, when Linux/Unix systems perform I/O operations, they 
+#  do so by reading or writing file descriptors
+lsof /tmp/demo2.sock
+# COMMAND   PID             USER   FD   TYPE    DEVICE              SIZE/OFF  NODE NAME
+# nc        22634           bobby  3u   unix    0xa5bfcdf1d549b6e7  0t0       /tmp/demo2.sock
+
+# Unix socket, but UDP, or SOCK_DGRAM type.  Still act as server and listen to connection
+nc -U /tmp/demo.sock -u -l
+# netcat client to interact with the server (note -u is required to match above -u)
+nc -U /tmp/demo.sock -u
 ```
 
 ### netstat
