@@ -765,6 +765,31 @@ envsubst '$USER' < welcome.txt # now, only $USER will be replaced
 envsubst '$USER,$HELLO' < welcome.txt # multiple vars in allow list
 envsubst 'Oddly this can have other text $USER,$HELLO' < welcome.txt # behaves the same as prev
 ```
+### exiftool
+
+Read, write, edit metadata information in all kinds of files, including image
+files (such as .png, etc).  
+
+```bash
+# yes, they do have structured metadata
+# sometimes even as JSON
+exiftool ./my_png_which_secretly_has_metadata.png
+ExifTool Version Number         : 13.25
+File Name                       : my_png_which_secretly_has_metadata.png
+Directory                       : my_dir
+File Size                       : 346 kB
+File Modification Date/Time     : 2025:05:17 17:45:32-04:00
+File Permissions                : -rw-r--r--
+File Type                       : PNG
+File Type Extension             : png
+MIME Type                       : image/png
+Image Width                     : 708
+Image Height                    : 566
+Bit Depth                       : 8
+Color Type                      : RGB with Alpha
+Compression                     : Deflate/Inflate
+... and so on...
+```
 
 ### export
 
